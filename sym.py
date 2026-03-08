@@ -5,6 +5,7 @@ from itertools import permutations
 from disjoint_set import DisjointSet
 import time
 import sys
+from collections import defaultdict
 
 # prohození pozic pro funkce pro generování permutací
 def swap_positions(p, i, j):
@@ -39,6 +40,49 @@ def gen2(n):
     result.append(swap_positions(list(range(n)), 0, 1))
     return result
 
+# rotace a reflexe
+def dihedral_gen(n):
+    size = n * n
+
+    def index(i, j):
+        return i * n + j
+
+    rot = [0] * size
+    refl = [0] * size
+
+    for i in range(n):
+        for j in range(n):
+            old = index(i, j)
+
+            # rotace 90° doprava
+            new_i, new_j = j, n - 1 - i
+            rot[old] = index(new_i, new_j)
+
+            # reflexe podle svislé osy
+            new_i, new_j = i, n - 1 - j
+            refl[old] = index(new_i, new_j)
+
+    return [rot, refl]
+
+# sousední transpozice pro problém nalezení matice se řádky a sloupci se zadaným součtem
+def sums_neighbors(values):
+    groups = defaultdict(list)
+    n = len(values)
+    idp = list(range(n))
+
+    # rozdělíme indexy podle hodnot
+    for idx, val in enumerate(values):
+        groups[val].append(idx)
+
+    transpositions = []
+
+    # pro každý blok generujeme sousední transpozice
+    for indices in groups.values():
+        if len(indices) > 1:
+            for a, b in zip(indices, indices[1:]):
+                transpositions.append(swap_positions(idp, a, b))
+
+    return transpositions
 
 # %%
 # vytvoření matice s proměnnými
@@ -65,42 +109,67 @@ def get_perm(matrix, pi_r, pi_c):
 # klauzule získané z porovnání zpermutované (parametr b) a nezpermutované (parametr a) matice proměnných
 def get_clauses(a, b, kmax, aux):
     clauses = []
+    n = len(a)
+    OO = n+1
+    II = n+2
     
-    for i in range(len(a)):
+    for i in range(n):
         if i >= kmax:
             break
+        if a[i] == b[i]:
+            continue
+            
         clause = [-a[i],b[i]]
+        # použité proměnné
+        active = set([a[i], b[i]])
 
         # množiny rovnajících se proměnných 
         ds = DisjointSet()
-        ds.union('o', b[i])
-        ds.union('i', a[i])
-        
-        # True pokud nastane 0=1
-        wrong = False
-        
+        ds.union(OO, b[i])
+        ds.union(II, a[i])
+
+        # nalezení tříd ekvivalencí
         if i > 0:
             for k in range(i):
                 if a[k] != b[k]:
                     ds.union(a[k], b[k])
-                    if ds.connected('o', 'i'):
-                        wrong = True
-                        break
-                    try:
-                        # pokud pro danou nerovnost již existuje proměnná navíc
-                        clause.append(aux[f"{a[k]} {b[k]}"])
-                    except:     
-                        # pokud pro danou nerovnost ještě proměnná navíc neexistuje
-                        clause.append(aux["curr"])                    
-                        aux[f"{a[k]} {b[k]}"] = aux["curr"]
-                        aux[f"{b[k]} {a[k]}"] = aux["curr"]
-                        clauses.append([-aux["curr"],a[k],b[k]])
-                        clauses.append([-aux["curr"],-a[k],-b[k]])
-                        clauses.append([aux["curr"],-a[k],b[k]])
-                        clauses.append([aux["curr"],a[k],-b[k]])
-                        aux["curr"] = aux["curr"] + 1
-        if ds.connected('o', 'i') or wrong:
+                    active.add(a[k])
+                    active.add(b[k])
+
+        # pokud 0 = 1, konec
+        cO = ds.find(OO)
+        cI = ds.find(II)
+        if cO == cI:
             continue
+
+        canon = [ds.find(j) for j in active]
+        active = list(active)
+
+        # přidání klauzulí
+        for j in range(len(active)):
+            # proměnná je ve ekvivalentní s 0
+            if canon[j] == cO:
+                clause.append(active[j])
+
+            # proměnná je ekvivalentní s 1
+            elif canon[j] == cI:
+                clause.append(-active[j])
+
+            # proměnná je ekvivalentní jiné proměnné
+            elif canon[j] != active[j]:
+                try:
+                    # pokud pro danou nerovnost již existuje proměnná navíc
+                    clause.append(aux[(active[j], canon[j])])
+                except:     
+                    # pokud pro danou nerovnost ještě proměnná navíc neexistuje
+                    clause.append(aux["curr"])                    
+                    aux[(active[j], canon[j])] = aux["curr"]
+                    aux[(canon[j], active[j])] = aux["curr"]
+                    clauses.append([-aux["curr"],active[j],canon[j]])
+                    clauses.append([-aux["curr"],-active[j],-canon[j]])
+                    clauses.append([aux["curr"],-active[j],canon[j]])
+                    clauses.append([aux["curr"],active[j],-canon[j]])
+                    aux["curr"] = aux["curr"] + 1
     
         clauses.append(clause)
     return clauses, aux
@@ -119,7 +188,7 @@ def symmetry_clauses(matrix, symtype, perms, kmax):
     clauses = []
 
     # slovník s proměnnými navíc + na "curr" uložena nejnižší volná proměnná
-    aux = {"curr" : m*n+1}
+    aux = {"curr" : m*n+3}
 
     # permutace pouze na řádcích
     if symtype == "r":
@@ -178,6 +247,48 @@ def symmetry_clauses(matrix, symtype, perms, kmax):
                 clauses += cls[0]
                 aux = cls[1]
 
+    # rotace a reflexe
+    elif symtype == "d":
+        perm = perms(n)
+
+        for p in perm:
+            a = []
+            b = []  
+            for i in range(len(matrix)):
+                a = a + matrix[i]                
+                for x in matrix[i]:
+                    b.append(p[x-1]+1)
+                    
+            cls = get_clauses(a, b, kmax, aux)
+            clauses += cls[0]
+            aux = cls[1]
+
+    # pro problém nalezení matice se řádky a sloupci se zadaným součtem 
+    elif symtype[:4] == "sums":
+        values = symtype[4:]
+        rc = values.split('|')
+        rsums = [int(x) for x in rc[0].split(',')]
+        csums = [int(x) for x in rc[1].split(',')]
+
+        row = perms(rsums)
+        col = perms(csums)
+
+        for p in row:
+            for q in col:
+                if p == idpr and q == idpc:
+                    continue
+                perm = get_perm(matrix, p, q)
+
+                a = []
+                b = []  
+                for i in range(len(matrix)):
+                    a = a + matrix[i]
+                    b = b + perm[i]
+                    
+                cls = get_clauses(a, b, kmax, aux)
+                clauses += cls[0]
+                aux = cls[1]
+                
     else:
         pass
 
@@ -185,12 +296,12 @@ def symmetry_clauses(matrix, symtype, perms, kmax):
 
 # %%
 # načtení zadání ze souboru
-cnf = CNF(from_file="inputqueens.cnf")
+cnf = CNF(from_file="inputphp.cnf")
 info = cnf.comments[0].split()
 
 # získání klauzulí pro rozbití symetrií
 s = time.time()
-clauses = symmetry_clauses(get_matrix(int(info[1]),int(info[2])), info[3], neighbors, 1)
+clauses = symmetry_clauses(get_matrix(int(info[1]),int(info[2])), info[3], neighbors, 25)
 for clause in clauses:
   cnf.append(clause)
 print("Symmetries: ", (time.time() - s) * 1e3, "ms")
@@ -200,7 +311,7 @@ print(" ")
 s = time.time()
 with Solver(bootstrap_with=cnf) as solver:
     print('formula is', f'{"S" if solver.solve() else "UNS"}ATisfiable')
-    #print('and the model is:', solver.get_model())
+    print('and the model is:', solver.get_model())
 
 print(" ")
 print("SAT solver: ", (time.time() - s) * 1e3, "ms")

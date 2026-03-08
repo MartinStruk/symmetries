@@ -1,6 +1,7 @@
 # %%
 from pysat.formula import CNF
 import itertools
+import random
 
 # formule pro pigeon hole principle problém
 def phpformula(p, h):
@@ -70,7 +71,7 @@ def nqueens(n):
 
 import itertools
 
-# fromule pro problém najít matici se řádky a sloupci se zadaným součtem
+# fromule pro problém nalezení matice se řádky a sloupci se zadaným součtem
 def rcsums(row_sums, col_sums):
     m = len(row_sums)
     n = len(col_sums)
@@ -116,13 +117,37 @@ def rcsums(row_sums, col_sums):
     return clauses
 
 # parametry pro jednotlivé problémy
-pig = 40
-hol = 39
+pig = 5
+hol = 5
 
-n = 100
+n = 20
 
-rsums = [1,2,3,4,5]
-csums = [2,2,2,2,2,2,2,1]
+# data o součtech a předání dat na vstup
+rtotal = 0
+ctotal = 0
+rsums = []
+csums = []
+# generování náhodných hodnot pro součty
+for _ in range(25):
+    rrand = random.randint(0,5)
+    crand = random. randint(0,5)
+    rtotal += rrand
+    rsums.append(rrand)
+    ctotal += crand
+    csums.append(crand)
+if rtotal > ctotal:
+    csums.append(rtotal-ctotal)
+else:
+    rsums.append(ctotal-rtotal)
+    
+sumdata = ""
+for i in range(len(rsums)):
+    if i != 0: sumdata += ','
+    sumdata += str(rsums[i])    
+sumdata += '|'
+for j in range(len(csums)):
+    if j != 0: sumdata += ','
+    sumdata += str(csums[j])
 
 # uložení do příslušného souboru společně s informacemi navíc v komentářích
 # (počet řádků/sloupců matice a typ symetrie)
@@ -135,11 +160,11 @@ with open("inputphp.cnf", "w") as f:
     cnfp.to_fp(f)
 
 with open("inputqueens.cnf", "w") as f:
-    f.write(f"c {n} {n} rc\n")
+    f.write(f"c {n} {n} d\n")
     cnfq.to_fp(f)
     
 with open("inputrcsums.cnf", "w") as f:
-    f.write(f"c {len(rsums)} {len(csums)} rc\n")
+    f.write(f"c {len(rsums)} {len(csums)} sums{sumdata}\n")
     cnfrc.to_fp(f)
 
 # %%
