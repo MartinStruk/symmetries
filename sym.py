@@ -1,10 +1,17 @@
-# %%
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[33]:
+
+
 from pysat.formula import CNF
 from pysat.solvers import Solver
 from itertools import permutations
 from disjoint_set import DisjointSet
 import time
 import sys
+import argparse
+import random
 from collections import defaultdict
 
 # prohození pozic pro funkce pro generování permutací
@@ -32,6 +39,39 @@ def neighbors(n):
     result = []
     for i in range(n - 1):
         result.append(swap_positions(idp, i, i + 1))
+    return result
+
+# množina náhodných transpozic, která se porovná s neighbors
+def randtrans(n):
+    idp = list(range(n))
+    seen = set()
+    result = []
+
+    while len(result) < n-1:
+        i, j = sorted(random.sample(range(n), 2))
+        if (i, j) not in seen:
+            seen.add((i, j))
+            seen.add((j, i))
+            result.append(swap_positions(idp,i,j))
+
+    return result
+
+def nongen(n):
+    idp = list(range(n))
+    seen = set()
+    result = []
+
+    if n > 3:
+        while len(result) < n-1:
+            i, j = sorted(random.sample(range(n-1), 2))
+            if (i, j) not in seen:
+                seen.add((i, j))
+                seen.add((j, i))
+                result.append(swap_positions(idp,i,j))
+    
+    else:
+        result = randtrans(n)
+    
     return result
 
 # dvouprvkový generátor grupy permutací
@@ -84,7 +124,10 @@ def sums_neighbors(values):
 
     return transpositions
 
-# %%
+
+# In[34]:
+
+
 # vytvoření matice s proměnnými
 def get_matrix(m, n):
     variables = []
@@ -199,7 +242,7 @@ def symmetry_clauses(matrix, symtype, perms, kmax):
             
             a = []
             b = []  
-            for i in range(len(matrix)):
+            for i in range(m):
                 a = a + matrix[i]
                 b = b + perm[i]
                 
@@ -216,7 +259,7 @@ def symmetry_clauses(matrix, symtype, perms, kmax):
             
             a = []
             b = []  
-            for i in range(len(matrix)):
+            for i in range(m):
                 a = a + matrix[i]
                 b = b + perm[i]
                 
@@ -239,7 +282,7 @@ def symmetry_clauses(matrix, symtype, perms, kmax):
 
                 a = []
                 b = []  
-                for i in range(len(matrix)):
+                for i in range(m):
                     a = a + matrix[i]
                     b = b + perm[i]
                     
@@ -254,7 +297,7 @@ def symmetry_clauses(matrix, symtype, perms, kmax):
         for p in perm:
             a = []
             b = []  
-            for i in range(len(matrix)):
+            for i in range(m):
                 a = a + matrix[i]                
                 for x in matrix[i]:
                     b.append(p[x-1]+1)
@@ -281,29 +324,66 @@ def symmetry_clauses(matrix, symtype, perms, kmax):
 
                 a = []
                 b = []  
-                for i in range(len(matrix)):
+                for i in range(m):
                     a = a + matrix[i]
                     b = b + perm[i]
                     
                 cls = get_clauses(a, b, kmax, aux)
                 clauses += cls[0]
                 aux = cls[1]
+
+    # pro matice trojrozměrných problémů, které jsou přepsané do dvourozměrné matice
+    elif symtype[:4] == "rc3d":
+        row2d = int(symtype[4])
+        val3d = m//row2d
+        idpr2d = list(range(row2d))
+        idpv = list(range(val3d))
+        
+        row = perms(row2d)
+        row.append(idpr2d)
+        col = perms(n)
+        col.append(idpc)
+        val = perms(val3d)
+        val.append(idpv)
+        for p in col:
+            permc = get_perm(matrix, idpr, p)
+            matrix3d = [permc[(i)*row2d:(i+1)*row2d] for i in range(val3d)]
+
+            for q in row:
+                permr = [get_perm(matrix3d[i],q,idpc) for i in range(val3d)]
+                
+                for r in val:
+                    a = []
+                    b = []  
+                    for i in range(val3d):
+                        for j in range(row2d):
+                            a = a + matrix[i*row2d+j]
+                            b = b + permr[r[i]][j]
+                            
+                cls = get_clauses(a, b, kmax, aux)
+                clauses += cls[0]
+                aux = cls[1]
+
                 
     else:
         pass
 
     return clauses
 
-# %%
-# načtení zadání ze souboru
-cnf = CNF(from_file="inputphp.cnf")
+
+# In[21]:
+
+
+"""# načtení zadání ze souboru
+cnf = CNF(from_file="inputgolf.cnf")
 info = cnf.comments[0].split()
 
 # získání klauzulí pro rozbití symetrií
 s = time.time()
-clauses = symmetry_clauses(get_matrix(int(info[1]),int(info[2])), info[3], neighbors, 25)
+clauses = symmetry_clauses(get_matrix(int(info[1]),int(info[2])), info[3], neighbors, 2000)
 for clause in clauses:
   cnf.append(clause)
+
 print("Symmetries: ", (time.time() - s) * 1e3, "ms")
 print(" ")
 
@@ -311,15 +391,49 @@ print(" ")
 s = time.time()
 with Solver(bootstrap_with=cnf) as solver:
     print('formula is', f'{"S" if solver.solve() else "UNS"}ATisfiable')
-    print('and the model is:', solver.get_model())
+    #print('and the model is:', solver.get_model())
 
 print(" ")
-print("SAT solver: ", (time.time() - s) * 1e3, "ms")
+print("SAT solver: ", (time.time() - s) * 1e3, "ms")"""
 
-# uložení výsledku do souboru
-cnf.to_file("output.cnf")
 
-# %%
+# In[22]:
+
+
+def main():
+    parser = argparse.ArgumentParser(description = "Možnosti pro vstupní argumenty:", formatter_class=argparse.RawTextHelpFormatter)
+
+    parser.add_argument("problem", type=str, help="Problém, který dostaneme na vstupu. Možnosti: inputphp.cnf, inputqueens.cnf, inputrcsums.cnf, inputlatinsq.cnf, inputgolf.cnf")
+
+    parser.add_argument("permutace", type=str, help="Množina permutací, která se použije pro generování klauzulí. Možnosti: all_perm, transpositions, neighbors, randtrans, nongen, gen2, dihedral_gen, sums_neighbors \nsums_neighbors je určeno speciálně pro inputrcsums.cnf")
+
+    parser.add_argument("k", type=int, help="Hodnota k, která určuje maximální hloubku generování klauzulí pro jednotlivé vzory. Pro k menší nebo rovno 0 se nevygenerují žádné klauzule.")
+
+    parser.add_argument("mc", type=bool, default=False, help="\"\" = False - zjišťujeme pouze, jestli je formule SAT nebo UNSAT \nTrue = hledáme počet všech řešení (model counting)")
+    
+    args = parser.parse_args()
+
+    cnf = CNF(from_file=args.problem)
+    info = cnf.comments[0].split()
+
+    if args.mc:
+        cnf.comments.append("c t pmc")
+        cnf.comments.append("c p show " + " ".join(map(str, list(range(1, int(info[1])*int(info[2])+1)))) + " 0")
+        
+    perms = {"all_perm":all_perm, "transpositions":transpositions, "neighbors":neighbors, "randtrans":randtrans, "nongen":nongen, "gen2":gen2, "dihedral_gen":dihedral_gen, "sums_neighbors":sums_neighbors}
+    
+    clauses = symmetry_clauses(get_matrix(int(info[1]),int(info[2])), info[3], perms[args.permutace], args.k)
+    for clause in clauses:
+      cnf.append(clause)
+   
+    cnf.to_file("output.cnf")
+    
+if __name__ == "__main__":
+    main()
+
+
+# In[ ]:
+
 
 
 

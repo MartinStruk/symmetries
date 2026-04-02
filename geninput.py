@@ -1,7 +1,13 @@
-# %%
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[1]:
+
+
 from pysat.formula import CNF
 import itertools
 import random
+import argparse
 
 # formule pro pigeon hole principle problém
 def phpformula(p, h):
@@ -69,9 +75,7 @@ def nqueens(n):
 
     return clauses
 
-import itertools
-
-# fromule pro problém nalezení matice se řádky a sloupci se zadaným součtem
+# fromule pro problém nalezení matice s řádky a sloupci se zadaným součtem
 def rcsums(row_sums, col_sums):
     m = len(row_sums)
     n = len(col_sums)
@@ -116,58 +120,200 @@ def rcsums(row_sums, col_sums):
 
     return clauses
 
-# parametry pro jednotlivé problémy
-pig = 5
-hol = 5
+# latinské čtverce
+def latinsq(n):
+    def var(r, c, v):        
+        return v * n * n + r * n + c + 1
 
-n = 20
+    clauses = []
 
-# data o součtech a předání dat na vstup
-rtotal = 0
-ctotal = 0
-rsums = []
-csums = []
-# generování náhodných hodnot pro součty
-for _ in range(25):
-    rrand = random.randint(0,5)
-    crand = random. randint(0,5)
-    rtotal += rrand
-    rsums.append(rrand)
-    ctotal += crand
-    csums.append(crand)
-if rtotal > ctotal:
-    csums.append(rtotal-ctotal)
-else:
-    rsums.append(ctotal-rtotal)
+    # právě jedna hodnota na každém místě
+    for r in range(n):
+        for c in range(n):
+            # alespoň jedna
+            clauses.append([var(r, c, v) for v in range(n)])
+
+            # nejvýše jedna
+            for v1 in range(n):
+                for v2 in range(v1 + 1, n):
+                    clauses.append([
+                        -var(r, c, v1),
+                        -var(r, c, v2)
+                    ])
+
+    # každá hodnota se objeví právě jednou v každém řádku
+    for r in range(n):
+        for v in range(n):
+            # alespoň jednou
+            clauses.append([var(r, c, v) for c in range(n)])
+
+            # nejvýše jednou
+            for c1 in range(n):
+                for c2 in range(c1 + 1, n):
+                    clauses.append([
+                        -var(r, c1, v),
+                        -var(r, c2, v)
+                    ])
+
+    # každá hodnota se objeví právě jendou v každém sloupci
+    for c in range(n):
+        for v in range(n):
+            # alespoň jednou
+            clauses.append([var(r, c, v) for r in range(n)])
+
+            # nejvýše jednou
+            for r1 in range(n):
+                for r2 in range(r1 + 1, n):
+                    clauses.append([
+                        -var(r1, c, v),
+                        -var(r2, c, v)
+                    ])
+
+    return clauses
+
+    from pysat.formula import CNF
+from itertools import combinations
+
+# problém sociálních golfistů
+def golf(g, ppg, w):
+    n = g * ppg  
+
+    clauses = []
+
+    def var(week, player, group):
+        return week * n * g + player * g + group + 1
+
+    # každý hráč v právě jedné skupině každý týden
+    for week in range(w):
+        for player in range(n):
+            # alespoň jedna skupina
+            clauses.append([var(week, player, group) for group in range(g)])
+
+            # nejvýše jedna skupina
+            for g1 in range(g):
+                for g2 in range(g1 + 1, g):
+                    clauses.append([-var(week, player, g1), -var(week, player, g2)])
+
+    # každá skupina má právě ppg hráčů každý týden
+    for week in range(w):
+        for group in range(g):
+            players = [var(week, i, group) for i in range(n)]
+
+            # alespoň ppg hráčů
+            for subset in combinations(players, n - ppg + 1):
+                clauses.append(list(subset))
+
+            # nejvýše ppg hráčů
+            for subset in combinations(players, ppg + 1):
+                clauses.append([-v for v in subset])
+
+    # žádný pár se nepotká dvakrát (nebo vícekrát)
+    for i in range(n):
+        for j in range(i + 1, n):
+            for w1 in range(w):
+                for w2 in range(w1 + 1, w):
+                    for g1 in range(g):
+                        for g2 in range(g):
+                            clauses.append([-var(w1, i, g1), -var(w1, j, g1), -var(w2, i, g2), -var(w2, j, g2)])
+
+    return clauses
+
+
+# In[2]:
+
+
+def main():
+    parser = argparse.ArgumentParser(description = "Možnosti pro vstupní argumenty:", formatter_class=argparse.RawTextHelpFormatter)
+
+    parser.add_argument("pigeons", type=int, help="Počet holubů pro problém holubníku")
+
+    parser.add_argument("holes", type=int, help="Počet holubníků pro problém holubníku")
+
+    parser.add_argument("n", type=int, help="Hodnota n pro problém n královen (N-queens)")
+
+    parser.add_argument("rc", type=int, help="Počet řádků a sloupců pro náhodně generované hodnoty pro problém nalezení matice s řádky a sloupci se zadaným součtem \nAby byl celkový součet ve všech řádcích roven celkovému součtu ve všech sloupcích, přidá se buď jeden řádek navíc, nebo jeden sloupec navíc")
     
-sumdata = ""
-for i in range(len(rsums)):
-    if i != 0: sumdata += ','
-    sumdata += str(rsums[i])    
-sumdata += '|'
-for j in range(len(csums)):
-    if j != 0: sumdata += ','
-    sumdata += str(csums[j])
-
-# uložení do příslušného souboru společně s informacemi navíc v komentářích
-# (počet řádků/sloupců matice a typ symetrie)
-cnfp = CNF(from_clauses=phpformula(pig,hol))
-cnfq = CNF(from_clauses=nqueens(n))
-cnfrc = CNF(from_clauses=rcsums(rsums,csums))
-
-with open("inputphp.cnf", "w") as f:
-    f.write(f"c {pig} {hol} rc\n")
-    cnfp.to_fp(f)
-
-with open("inputqueens.cnf", "w") as f:
-    f.write(f"c {n} {n} d\n")
-    cnfq.to_fp(f)
+    parser.add_argument("rcrand", type=int, help="Maximální hodnota, která se může náhodně vygenerovat pro součet v konkrétním řádku nebo sloupci")
     
-with open("inputrcsums.cnf", "w") as f:
-    f.write(f"c {len(rsums)} {len(csums)} sums{sumdata}\n")
-    cnfrc.to_fp(f)
+    parser.add_argument("lsq", type=int, help="Rozměr matice pro problém latinských čtverců")
+    
+    parser.add_argument("g", type=int, help="Počet skupin pro problém sociálních golfistů")
+    
+    parser.add_argument("p", type=int, help="Počet hráčů pro problém sociálních golfistů")
+    
+    parser.add_argument("w", type=int, help="Počet týdnů pro problém sociálních golfistů")
 
-# %%
+    args = parser.parse_args()
+
+    pig = args.pigeons
+    hol = args.holes
+    n = args.n
+    lsq = args.lsq
+    g = args.g
+    p = args.p
+    w = args.w
+    
+    # data o součtech a předání dat na vstup
+    rtotal = 0
+    ctotal = 0
+    rsums = []
+    csums = []
+    # generování náhodných hodnot pro součty
+    for _ in range(args.rc):
+        rrand = random.randint(0,args.rcrand)
+        crand = random. randint(0,args.rcrand)
+        rtotal += rrand
+        rsums.append(rrand)
+        ctotal += crand
+        csums.append(crand)
+    if rtotal > ctotal:
+        csums.append(rtotal-ctotal)
+    else:
+        rsums.append(ctotal-rtotal)
+    
+    sumdata = ""
+    for i in range(len(rsums)):
+        if i != 0: sumdata += ','
+        sumdata += str(rsums[i])    
+    sumdata += '|'
+    for j in range(len(csums)):
+        if j != 0: sumdata += ','
+        sumdata += str(csums[j])
+    
+    # uložení do příslušného souboru společně s informacemi navíc v komentářích
+    # (počet řádků/sloupců matice a typ symetrie)
+    cnfp = CNF(from_clauses=phpformula(pig,hol))
+    cnfq = CNF(from_clauses=nqueens(n))
+    cnfrc = CNF(from_clauses=rcsums(rsums,csums))
+    cnflsq = CNF(from_clauses=latinsq(lsq))
+    cnfg = CNF(from_clauses=golf(g,p,w))
+    
+    with open("inputphp.cnf", "w") as f:
+        f.write(f"c {pig} {hol} rc\n")
+        cnfp.to_fp(f)
+    
+    with open("inputqueens.cnf", "w") as f:
+        f.write(f"c {n} {n} d\n")
+        cnfq.to_fp(f)
+        
+    with open("inputrcsums.cnf", "w") as f:
+        f.write(f"c {len(rsums)} {len(csums)} sums{sumdata}\n")
+        cnfrc.to_fp(f)
+
+    with open("inputlatinsq.cnf", "w") as f:
+        f.write(f"c {lsq*lsq} {lsq} rc3d{lsq}\n")
+        cnflsq.to_fp(f)
+
+    with open("inputgolf.cnf", "w") as f:
+        f.write(f"c {p*w*g} {g} rc3d{p*g}\n")
+        cnfg.to_fp(f)
+        
+if __name__ == "__main__":
+    main()
+
+
+# In[ ]:
+
 
 
 
