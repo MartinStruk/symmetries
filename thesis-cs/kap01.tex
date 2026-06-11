@@ -110,8 +110,247 @@ $$pat_4(\pi) = (A, 0, B, 1, x_5, x_6, B, A, 0).$$
 Nyní pokud libovolný vektor $v$ odpovídá tomuto vzoru, tak o něm automaticky víme, že $v <_{\text{lex}} vec(H)$. Jelikož $A, B, x_5, x_6$ mohou být libovolná, pokryli jsme tímto vzorem celkem $2^4 = 16$ různých vektorů.
 \end{prikl}
 
+\section{Popis problémů a jejich kódování}
+\subsection{Problém holubníku (Pigeonhole principle)}
+Jako první se podíváme na již několikrát zmiňovaný problém holubníku. Princip holubníku nám říká, že pokud máme $m$ předmětů (holubů), chceme je rozmístit do $n$ kontejnerů (holubníků) a navíc $m>n$, pak musí alespoň jeden kontejner obsahovat více než jeden předmět. Přestože se toto tvrzení zdá být zřejmé, pomáhá vysvětlit spousta zdaleka ne tak zřejmých tvrzení. Tento princip přeformulujeme do tvaru problému následovně. Pro zadaný počet holubů $m$ a počet holubníků $n$ musíme holuby rozmístit do holubníků tak, aby každý holub byl alespoň v jednom holubníku a aby v každém holubníku byl nejvýše jeden holub. Většinou se uvažuje $m=n+1$, takže je problém nesplnitelný. Přestože se výsledek opět zdá být zřejmý, pro SAT solvery je řešení tohoto problému bez rozbíjení symetrií velmi náročné. Proto se tento problém velmi často využívá jako základní benchmark právě pro testování rozbíjení symetrií.
 
+Kódování tohoto problému do SAT formule je přímočaré. Stejně jako v jednom z předchozích příkladů budeme mít matici binárních proměnných, kde řádky budou odpovídat holubům a sloupce holubníkům. Máme tedy $m\times n$ matici. Proměnné jsou $x_{in+j+1}$, kde $i$ je řádek (holub) a $j$ je sloupec (holubník) a $x_{in+j+1} = 1$, pokud $i$-tý holub je umístěn do $j$-tého holubníku, a $x_{in+j+1}=0$ jinak. Řádky a sloupce budeme v této sekci vždy indexovat od $0$. Kódování podmínek pak vypadá následovně:
 
+\begin{pozn}{(Problém holubníku jako SAT formule)}
+Každý holub v alespoň jednom holubníku: \[
+\bigwedge_{i=0}^{m-1}
+\left(
+x_{in+1} \vee x_{in+2} \vee \cdots \vee x_{in+n}
+\right)
+\]
+V každém holubníku nejvýše jeden holub: 
+\[
+\bigwedge_{j=0}^{n-1}
+\bigwedge_{0 \le i < k \le m-1}
+\left(
+\neg x_{in+j+1} \vee \neg x_{kn+j+1}
+\right)
+\]
+\end{pozn}
 
+Jak již bylo také zmíněno, symetrie zde leží v tom, že můžeme mezi sebou permutovat zvlášť holuby a zvlášť holubníky. Můžeme tedy permutovat buď řádky, sloupce, nebo obojí nezávisle na sobě.
 
+\subsection{Problém N královen (N-queens problem)}
+Dalším z vybraných problémů je známý problém N královen. Zde dostaneme na vstupu jediný parametr $n$ a za úkol máme rozmístit $n$ šachových figurek královen na $n\times n$ šachovnici tak, aby se žádné dvě z nich vzájemně neohrožovaly. Řešení tohoto problému pro SAT solvery není až tak náročné i bez rozbíjení symetrií a jedno řešení zvládají rychle najít i pro relativně velká $n$. Avšak celkový počet řešení se zvyšujícím se $n$ stoupá dramaticky a my tím pádem můžeme dobře sledovat, o kolik se celkový počet řešení po rozbíjení symetrií sníží.
 
+Kódování problému N královen do SAT formule také není složité. Vytvoříme $n\times n$ matici binárních proměnných, kde jednotlivé pozice odpovídají pozicím na šachovnici. Pro $i$-tý řádek a $j$-tý sloupec pak $x_{(i-1)n+j} = 1$, pokud jsme umístili královnu na pozici $(i, j)$, a $x_{(i-1)n+j}=0$ jinak. Nejjednodušší kódování pak dostaneme pro podmínky právě jedné královny v každém řádku, sloupci a na každé diagonále následovně:
+
+\begin{pozn}{(Problém N královen jako SAT formule)}
+V každém řádku alespoň jedna královna: \[
+\bigwedge_{r=0}^{n-1}
+\left(
+\bigvee_{c=0}^{n-1}
+x_{rn+c+1}
+\right)
+\]
+
+V každém řádku nejvýše jedna královna: \[
+\bigwedge_{r=0}^{n-1}
+\bigwedge_{0 \le c_1 < c_2 \le n-1}
+\left(
+\neg x_{rn+c_1+1} \vee
+\neg x_{rn+c_2+1}
+\right)
+\]
+
+V každém sloupci alespoň jedna královna: \[
+\bigwedge_{c=0}^{n-1}
+\left(
+\bigvee_{r=0}^{n-1}
+x_{rn+c+1}
+\right)
+\]
+
+V každém sloupci nejvýše jedna královna: \[
+\bigwedge_{c=0}^{n-1}
+\bigwedge_{0 \le r_1 < r_2 \le n-1}
+\left(
+\neg x_{r_1 n+c+1} \vee
+\neg x_{r_2 n+c+1}
+\right)
+\]
+
+Nejvýše jedna královna diagonálně směrem doprava nahoru:
+\[
+\bigwedge_{d=-(n-1)}^{n-1}
+\bigwedge_{\substack{
+0 \le r_1 < r_2 \le n-1 \\
+0 \le r_1-d < n,\; 0 \le r_2-d < n
+}}
+\left(
+\neg x_{r_1 n+(r_1-d)+1} \vee
+\neg x_{r_2 n+(r_2-d)+1}
+\right)
+\]
+
+Nejvýše jedna královna diagonálně směrem doprava dolů:
+\[
+\bigwedge_{s=0}^{2n-2}
+\bigwedge_{\substack{
+0 \le r_1 < r_2 \le n-1 \\
+0 \le s-r_1 < n,\; 0 \le s-r_2 < n
+}}
+\left(
+\neg x_{r_1 n+(s-r_1)+1} \vee
+\neg x_{r_2 n+(s-r_2)+1}
+\right)
+\]
+\end{pozn}
+
+Kvůli podmínkám na diagonály u tohoto problému zřejmě nemůžeme libovolně permutovat řádky a sloupce. Avšak problém symetrie samozřejmě obsahuje. Z jednoho řešení můžeme získat několik dalších ekvivalentních řešení pomocí rotací a reflexí celé šachovnice. Zastoupení dalšího typu symetrií je dalším z důvodů zařazení problému N královen.
+
+\subsection{Problém nalezení matice s řádky a sloupci se zadanými součty}
+Pro následující problém může už být zadání zajímavější. Na vstupu dostaneme množinu čísel $K$ a množinu čísel $L$, kde $m:=|K|$, $n:=|L|$, prvky $K$ budeme značit $k_r$ pro $r\in \{1,...,m\}$ a prvky $L$ budeme značit $l_c$ pro $c\in \{1,...,n\}$. Každý prvek $K$ odpovídá zadání pro jeden řádek a každý prvek $L$ odpovídá zadání pro jeden sloupec. Máme tedy $m\times n$ matici binárních proměnných. Naším úkolem pak je přiřadit proměnným hodnoty $0$ a $1$ tak, aby součet hodnot v $r$-tém řádku byl právě $k_r$, a aby součet hodnot v $c$-tém sloupci byl právě $l_c$.
+
+Kódování je v tomto případě už také složitější. Podmínky na právě $k_r$ jedniček v řádku a právě $l_c$ jedniček ve sloupci se sice ve své podstatě podobají podmínkám na právě jednu jedničku v řádku/sloupci z předchozích problémů, ale počet klauzulí je zpravidla výrazně vyšší, protože přidáváme klauzuli pro každou kombinaci určitého počtu proměnných. Existují efektivnější kódování, ale těmi se v této práci nebudeme zabývat, jelikož problémy zde slouží především k testování. Hlavní ideou práce je, že na vstupu dostaneme SAT formuli a typ symetrie, se kterými pracujeme dále. Tím pádem nemáme zaručeno, že kódování je jakkoliv optimalizované, a zároveň ho sami optimalizovat nemůžeme, jelikož nevíme, co za problém SAT formule představuje. Námi použité kódování pak bude vypadat následovně:
+
+\begin{pozn}{(Problém nalezení matice s řádky a sloupci se zadanými součty jako SAT formule)}
+Alespoň $k_r$ jedniček v řádku $r$: 
+\[
+\bigwedge_{r=0}^{m-1}
+\;
+\bigwedge_{\substack{
+S \subseteq \{0,\dots,n-1\}\\
+|S|=n-k_r+1
+}}
+\left(
+\bigvee_{c \in S}
+x_{rn+c+1}
+\right)
+\]
+
+Nejvýše $k_r$ jedniček v řádku $r$:
+\[
+\bigwedge_{r=0}^{m-1}
+\;
+\bigwedge_{\substack{
+S \subseteq \{0,\dots,n-1\}\\
+|S|=k_r+1
+}}
+\left(
+\bigvee_{c \in S}
+\neg x_{rn+c+1}
+\right)
+\]
+
+Alespoň $l_c$ jedniček ve sloupci $c$:
+\[
+\bigwedge_{c=0}^{n-1}
+\;
+\bigwedge_{\substack{
+T \subseteq \{0,\dots,m-1\}\\
+|T|=m-\ell_c+1
+}}
+\left(
+\bigvee_{r \in T}
+x_{rn+c+1}
+\right)
+\]
+
+Nejvýše $l_c$ jedniček ve sloupci $c$:
+\[
+\bigwedge_{c=0}^{n-1}
+\;
+\bigwedge_{\substack{
+T \subseteq \{0,\dots,m-1\}\\
+|T|=\ell_c+1
+}}
+\left(
+\bigvee_{r \in T}
+\neg x_{rn+c+1}
+\right)
+\]
+\end{pozn}
+
+Symetrie pro tento problém jsou také řádkové a sloupcové jako u problému holubníku, avšak permutovat mezi sebou můžeme jen řádky se stejnými požadovanými součty a stejně tak jen sloupce se stejnými požadovanými součty.
+
+\subsection{Problém latinských čtverců}
+Další z velmi známých problémů je problém latinských čtverců. Cílem je pro vstupní parametr $n$ rozmístit do $n\times n$ matice hodnoty $1,...,n$ tak, aby se v každém řádku a v každém sloupci vyskytovala každá hodnota právě jednou. Jelikož proměnné mohou nabývat pouze $0$, nebo $1$, je tento problém na první pohled trojrozměrný. Nejjednodušší reprezentací se nabízí použití proměnných $x_{r,c,v}$, kde každá tato proměnná říká, jestli na pozici v $r$-tém řádku a v $c$-tém sloupci se vyskytuje hodnota $v$. My bychom ale chtěli opět pracovat s dvourozměrnou maticí. Proto si pro každou hodnotu $v$ vrstvy trojrozměrné matice rozdělíme na $n$ binárních matic $n\times n$ a ty poskládáme pod sebe do jedné dvourozměrné matice. Výsledkem tedy bude $n^2\times n$ binární matice, kde proměnná $x_{vn^2+rn+c+1}$ odpovídá proměnné $x_{r,c,v}$ výše. Pro přehlednost však v rámci této sekce zůstaneme u zápisu pomocí proměnných ve tvaru $x_{r,c,v}$.
+
+Kódování pak dostaneme již dobře známým postupem, kdy si podmínky pro právě jednu hodnotu na každé pozici, každou hodnotu právě jednou v každém řádku a každou hodnotu právě jednou v každém sloupci rozdělíme na část „alespoň jednou” a na část „nejvýše jednou”. Ty zapíšeme analogicky zápisu z předchozích problémů. Kódování pak vypadá následovně:
+\begin{pozn}{Problém latinských čtverců jako SAT formule}
+Alespoň jedna hodnota na každé pozici:
+
+\[
+\bigwedge_{r=0}^{n-1} \bigwedge_{c=0}^{n-1}
+\left( \bigvee_{v=0}^{n-1} x_{r,c,v} \right)
+\]
+Nejvýše jedna hodnota na každé pozici:
+\[
+\bigwedge_{r=0}^{n-1} \bigwedge_{c=0}^{n-1}
+\bigwedge_{0 \le v_1 < v_2 < n}
+\left( \neg x_{r,c,v_1} \vee \neg x_{r,c,v_2} \right)
+\]
+Každá hodnota alespoň jednou v každém řádku:
+\[
+\bigwedge_{r=0}^{n-1} \bigwedge_{v=0}^{n-1}
+\left( \bigvee_{c=0}^{n-1} x_{r,c,v} \right)
+\]
+Každá hodnota nejvýše jednou v každém řádku:
+\[
+\bigwedge_{r=0}^{n-1} \bigwedge_{v=0}^{n-1}
+\bigwedge_{0 \le c_1 < c_2 < n}
+\left( \neg x_{r,c_1,v} \vee \neg x_{r,c_2,v} \right)
+\]
+Každá hodnota alespoň jednou v každém sloupci:
+\[
+\bigwedge_{c=0}^{n-1} \bigwedge_{v=0}^{n-1}
+\left( \bigvee_{r=0}^{n-1} x_{r,c,v} \right)
+\]
+Každá hodnota nejvýše jednou v každém sloupci:
+\[
+\bigwedge_{c=0}^{n-1} \bigwedge_{v=0}^{n-1}
+\bigwedge_{0 \le r_1 < r_2 < n}
+\left( \neg x_{r_1,c,v} \vee \neg x_{r_2,c,v} \right)
+\]
+\end{pozn}
+
+U latinských čtverců můžeme zřejmě nezávisle na sobě permutovat řádky, sloupce a i hodnoty, které na pozice zapisujeme. U tohoto problému je dobře známé, že i pro malá $n$ je celkový počet řešení obrovský. Například pro $n=5$ existuje $161280$ řešení, ale pro $n=6$ jich existuje již $812851200$. Tyto počty jsou však počítány bez jakéhokoliv rozbíjení symetrií a díky symetriím v řádcích, sloupcích i v hodnotách můžeme očekávat, že jich je tím pádem velmi velké množství ekvivalentních. V naší reprezentaci $n^2\times n$ binární maticí musíme řádky permutovat vždy zvlášť v každé z $n$ disjunktních $n\times n$ binárních podmatic (celá podmatice musí vždy odpovídat pouze jedné z hodnot a pokud permutujeme řádky u jedné z podmatic, musíme je stejně permutovat i u všech podmatic odpovídajícím ostatním hodnotám) a symetrie na hodnotách rozbíjíme permutacemi celých $n\times n$ binárních podmatic představujících jednotlivé hodnoty. Sloupce můžeme permutovat běžně bez žádných speciálních omezení.
+\subsection{Problém společenských golfistů}
+Posledním problémem, kterým se budeme zabývat je problém sociálních golfistů. Zde dostaneme na vstupu počet týdnů $W$, počet skupin $G$ a počet hráčů v každé skupině $ppg$. Celkový počet hráčů si označíme $P$ a musí tedy platit $P=ppg*G$. Za úkol pak máme rozvrhnout hry golfu na $W$ týdnů tak, aby každý týden hrál každý hráč v některé ze skupin, a zároveň aby žádná dvojice hráčů nebyla společně ve stejné skupině za všechny týdny více než jednou. Tento problém ze zdá být ze všech uvedených problémů nejzajímavější a zřejmě je opět trojrozměrný. My však opět použijeme zápis dvourozměrnou binární maticí z problému latinských čtverců. Uvažujeme $P\times G$ binární podmatice, kterých pod sebe poskládáme $W$. Výslednou maticí je $(P\cdot W)\times G$ binární matice, ve které proměnné $x_{wPG+pG+g+1}$ říkají, jestli hráč $p$ hraje ve skupině $g$ ve $w$-tý týden. Pro přehlednost v této sekci zapisujeme tyto proměnné podobně jako v předchozím problému ve tvaru $x_{w,p,g}$.
+
+Kódování se převážně opět podobá kódováním předchozích problémů. Zásadně se odlišuje pouze podmínkou na to, že se žádný pár hráčů nemůže potkat dvakrát. Ta je zde opět podobně jako u problému nalezení matice s řádky a sloupci se zadanými součty zakódována nejjednodušším způsobem, přestože existují efektivnější kódování. Výsledné kódování je pak následující:
+\begin{pozn}{Problém společenských golfistů jako SAT formule}
+Každý hráč v alespoň jedné skupině každý týden:
+\[
+\bigwedge_{w=0}^{W-1} \bigwedge_{p=0}^{P-1}
+\left( \bigvee_{g=0}^{G-1} x_{w,p,g} \right)
+\]
+Každý hráč v nejvýše jedné skupině každý týden:
+\[
+\bigwedge_{w=0}^{W-1} \bigwedge_{p=0}^{P-1}
+\bigwedge_{0 \le g_1 < g_2 < G}
+\left( \neg x_{w,p,g_1} \vee \neg x_{w,p,g_2} \right)
+\]
+Každá skupina má alespoň $ppg$ hráčů každý týden:
+\[
+\bigwedge_{w=0}^{W-1} \bigwedge_{g=0}^{G-1}
+\bigwedge_{\substack{S \subseteq P \\ |S| = P - ppg + 1}}
+\left( \bigvee_{p \in S} x_{w,p,g} \right)
+\]
+Každá skupina má nejvýše $ppg$ hráčů každý týden:
+\[
+\bigwedge_{w=0}^{W-1} \bigwedge_{g=0}^{G-1}
+\bigwedge_{\substack{S \subseteq P \\ |S| = ppg + 1}}
+\left( \bigvee_{p \in S} \neg x_{w,p,g} \right)
+\]
+Žádný pár hráčů se nepotká dvakrát:
+\[
+\bigwedge_{0 \le i < j < P}
+\bigwedge_{0 \le w_1 < w_2 < W}
+\bigwedge_{g_1=0}^{G-1} \bigwedge_{g_2=0}^{G-1}
+\left(
+\neg x_{w_1,i,g_1} \;\vee\;
+\neg x_{w_1,j,g_1} \;\vee\;
+\neg x_{w_2,i,g_2} \;\vee\;
+\neg x_{w_2,j,g_2}
+\right)
+\]
+\end{pozn}
+
+Ekvivalentní jsou si zde vzájemně hráči, skupiny i týdny. Všechny parametry tedy opět můžeme nezávisle na sobě libovolně permutovat a získáme ekvivalentní řešení. Permutace v naší dvourozměrné reprezentaci opět musíme provádět analogicky případu u problému latinských čtverců.
