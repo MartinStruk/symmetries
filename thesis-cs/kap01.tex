@@ -1,20 +1,13 @@
 %%% Fiktivní kapitola s ukázkami sazby
 
 \chapter{Teoretická část}
-Background, permutace, generátory, satsuma, breakid, detekují symetrie ale není jasné proč fungují dobře generátory
-
-Definice: budeme používat 2D binární matice, seřazení do vektoru a proměnné v řádcích
-
-Definice patternu, odkaz na paper, popis problémů
-
-
 
 
 \section{Základní definice}
 
 Jelikož se budeme zabývat symetriemi, hlavní objekty, na které se budeme soustředit, budou samozřejmě podgrupy symetrické grupy. Prvky, které budeme permutovat, budou proměnné ze zadaných SAT formulí. Ty můžeme reprezentovat jednoduše jako čísla $\{1,...,n\}$, takže symetrickou grupu na těchto prvcích můžeme značit $S_n$.
 
-Budeme předpokládat, že symetrie zadaného problému známe již ze zadání. Je to z toho důvodu, že budeme chtít navázat na jednu konkrétní informaci z nástrojů jako je $BREAKID$ nebo $SATSUMA$ (odkaz na papery). Tyto nástroje dostanou na vstupu SAT formuli a snaží se v ní detekovat určité typy symetrií. Pokud symetrii detekují, tím pádem najdou určitou podgrupu $G \subseteq S_n$, rozbíjí symetrie generováním Lex-Leader klauzulí $x \leq_{\text{lex}} \pi(x)$ pro $\pi$ z množiny generátorů $G$, které získají při detekci symetrie. Zmíněnou informací je, že takto získané klauzule dávají velmi dobré částečné rozbití symetrie, ale ani samotným autorům těchto nástrojů není jasné, proč tomu tak je. V této práci chceme tedy zkoumat, jestli vlastnost, že určitá množina permutací generuje celou podgrupu odpovídající symetrii daného problému , znamená, že s ní dosáhneme lepšího částečného rozbití symetrie. Pro úplnost si na jednoduchém příkladu ukážeme, že množinou generující danou grupu permutací nemusíme dosáhnout úplného rozbití symetrie, což by někoho na první pohled mohlo u generátorů napadnout.
+Budeme předpokládat, že symetrie zadaného problému známe již ze zadání. Je to z toho důvodu, že budeme chtít navázat na jednu konkrétní informaci z nástrojů jako je \textproc{BreakID} nebo \textproc{Satsuma} \cite{devriendt2016breakidstaticsymmetrybreaking}\cite{DBLP:journals/corr/abs-2406-13557}. Tyto nástroje dostanou na vstupu SAT formuli a snaží se v ní detekovat určité typy symetrií. Pokud symetrii detekují, tím pádem najdou určitou podgrupu $G \subseteq S_n$, rozbíjí symetrie generováním \textproc{Lex-Leader} podmínek $x \leq_{\text{lex}} \pi(x)$ pro $\pi$ z množiny generátorů $G$, které získají při detekci symetrie \cite{devriendt2016breakidstaticsymmetrybreaking}\cite{DBLP:journals/corr/abs-2406-13557}. Zmíněnou informací je, že takto získané klauzule dávají velmi dobré částečné rozbití symetrie, ale ani samotným autorům těchto nástrojů není jasné, proč tomu tak je. V této práci chceme tedy zkoumat, jestli vlastnost, že určitá množina permutací generuje celou podgrupu odpovídající symetrii daného problému , znamená, že s ní dosáhneme lepšího částečného rozbití symetrie. Pro úplnost si na jednoduchém příkladu ukážeme, že množinou generující danou grupu permutací nemusíme dosáhnout úplného rozbití symetrie, což by někoho na první pohled mohlo u generátorů napadnout.
 
 \begin{prikl}
 Použijeme příklad již zmíněný v úvodu. Uvažujme tedy problém holubníku s pěti holubníky a jedním holubem. Máme tedy celkem pět proměnných, které budeme nyní pro přehlednost značit $x_1, x_2, x_3, x_4, x_5$. Hodnoty těchto proměnných mohou být pouze $1$ nebo $0$ a hodnota $1$ znamená, že holub je v holubníku odpovídajícímu danému indexu. Z našich pěti proměnných tedy vždy musí právě jedna nabývat hodnoty $1$ a právě čtyři musí nabývat hodnoty $0$. Holubníky jsou si ekvivalentní a tím pádem můžeme proměnné libovolně permutovat. Pracujeme tedy s grupou $S_5$ (kde permutace indexů odpovídá permutaci proměnných s těmito indexy). Pro tu vezmeme množinu generátorů $\{(1,2),(1,5,4,3,2)\}$. Označme si je $\pi_1 := (1,2)$ a $\pi_2 := (1,5,4,3,2)$. Nyní dostaneme dvě podmínky:
@@ -36,7 +29,7 @@ Pro nás bude vždy platit, že $0 \leq_{\text{lex}} 1$ a že proměnné dříve
 Analogickým postupem můžeme ověřit, že ale například pro množinu generátorů $\{(1,2),(1,2,3,4,5)\}$ úplné rozbití symetrie dostaneme a zbyde nám jako jediné možné řešení $(0,0,0,0,1)$.
 \end{prikl}
 
-V této práci se zaměříme především na problémy, jejichž řešení lze reprezentovat binární maticí. Veškeré postupy je možné přímočaře zobecnit i do vícerozměrných problémů, jen se zpravidla dramaticky zvedne počet proměnných, symetrií a celkově náročnost vyřešení problému. 
+V této práci se zaměříme především na problémy, jejichž řešení lze reprezentovat binární maticí \cite{inproceedings}. Veškeré postupy je možné přímočaře zobecnit i do vícerozměrných problémů, jen se zpravidla dramaticky zvedne počet proměnných, symetrií a celkově náročnost vyřešení problému. 
 
 
 
@@ -81,8 +74,16 @@ vec(H) &\leq_{\text{lex}} vec(\pi(H)) \text{ ,neboli}\\
 Dále už bychom mohli postupovat analogicky prvnímu příkladu s jedním holubem a pěti holubníky.
 \end{prikl}
 
+V závěru této sekce si pro úplnost ještě uvedeme a dokážeme následující lemma.
+
+\begin{lemma}[Zachování splnitelnosti při přidání \textproc{Lex-Leader} podmínek]
+Nechť $F$ je booleovská formule a nechť $P$ je množina permutací proměnných, které odpovídají symetriím formule $F$. Pokud je formule $F$ splnitelná, pak je splnitelná i formule \[ F \land \bigwedge_{\pi \in P} \bigl( x \leq_{\mathrm{lex}} \pi(x) \bigr), \] kde $x$ je vektor proměnných.
+\end{lemma}
+
+\begin{proof} Nechť $\alpha$ je libovolné splňující ohodnocení formule $F$. Protože prvky množiny $P$ jsou permutacemi odpovídajícími symetriím formule $F$, jsou takovými permutacemi také všechny prvky grupy $H = \langle P \rangle$. Každé ohodnocení z \[ H(\alpha) = \{ \sigma(\alpha) \mid \sigma \in H \} \] tedy rovněž splňuje formuli $F$. Jelikož je množina $H(\alpha)$ konečná, existuje v ní lexikograficky nejmenší prvek (kanonické řešení). Označme jej $\alpha_{kan}$. Pro každou permutaci $\pi \in P$ platí \[ \pi(\alpha_{kan}) \in H(\alpha), \] a z minimality prvku $\alpha_{kan}$ vzhledem k lexikografickému uspořádání proto dostáváme \[ \alpha_{kan} \leq_{\mathrm{lex}} \pi(\alpha_{kan}). \] Ohodnocení $\alpha_{kan}$ tedy splňuje všechny přidané \textproc{Lex-Leader} podmínky, a zároveň splňuje i původní formuli $F$. Formule \[ F \land \bigwedge_{\pi \in P} \bigl( \alpha \leq_{\text{lex}} \pi(\alpha) \bigr) \] je proto splnitelná. \end{proof}
+
 \section{Kódování podmínek}
-V této části se podíváme blíže na to, jak budeme kódovat podmínky $\leq_{\text{lex}}$ jako SAT klauzule. Využijeme k tomu takzvané \emph{vzory} z (odkaz na paper) (anglicky \emph{patterns}). Idea je taková, že pro podmínku $x \leq_{\text{lex}} \pi(x)$ budeme naopak postupně sestavovat podmínku $\pi(x) <_{\text{lex}} x$, kterou poté znegujeme. Postupným sestavováním se myslí, že si v každém kroku zafixujeme pozici ve vektorech, na které se mají poprvé lišit (respektive první pozice, na které je proměnná v $\pi(x)$ ostře menší než proměnná v $x$). To nám zároveň říká, že na všech předchozích pozicích se vektory musí rovnat. Z těchto vlastností pak odvodíme hledaný vzor. 
+V této části se podíváme blíže na to, jak budeme kódovat podmínky $\leq_{\text{lex}}$ jako SAT klauzule. Využijeme k tomu takzvané \emph{vzory} ze \cite{codish2025breakingsymmetriessetcoveringperspective} (anglicky \emph{patterns}). Idea je taková, že pro podmínku $x \leq_{\text{lex}} \pi(x)$ budeme naopak postupně sestavovat podmínku $\pi(x) <_{\text{lex}} x$, kterou poté znegujeme. Postupným sestavováním se myslí, že si v každém kroku zafixujeme pozici ve vektorech, na které se mají poprvé lišit (respektive první pozice, na které je proměnná v $\pi(x)$ ostře menší než proměnná v $x$). To nám zároveň říká, že na všech předchozích pozicích se vektory musí rovnat. Z těchto vlastností pak odvodíme hledaný vzor. 
 
 \begin{definice}
 Nechť $a = (a_1,...,a_n)$ a $b = (b_1,...,b_n)$. Pak řekneme, že $a$ je menší než $b$ na $i$-té pozici, pokud
@@ -94,9 +95,15 @@ Tuto vlastnost budeme značit $a <_{\text{lex}}^{i} b$.
 Jelikož pracujeme s binárními proměnnými, $(a_i < b_i)$ znamená jednoduše $(a_i = 0) \land (b_i = 1)$.
 \end{pozn}
 
-\begin{pozn}
-$$a <_{\text{lex}}^{i} b \Leftrightarrow \bigvee_{i=1}^{n} a <_{\text{lex}}^{i} b$$
-\end{pozn}
+\begin{lemma}
+$$a <_{\text{lex}} b \Leftrightarrow \bigvee_{i=1}^{n} a <_{\text{lex}}^{i} b$$
+\end{lemma}
+
+\begin{proof}
+Pokud $a <_{\text{lex}} b$, tak musí existovat alespoň jedna pozice $i$ taková, že $a_i < b_i$. Vezměme si za $i$ nejmenší takovou pozici. Pak pro všechna $j<i$ musí platit $a_j = b_j$, protože pokud by $a_j > b_j$ pro nějaké $j < i$, platilo by, že $a >_{\text{lex}} b$. To plyne z toho, že v námi používaném lexikografickém uspořádání mají dřívější pozice vždy větší váhu. Našli jsme tedy $i$ takové, že $a_i < b_i$ a zároveň $a_j = b_j$ pro všechna $j < i$. To je přesně definice $a <_{\text{lex}}^{i} b$.
+
+Naopak pokud $\bigvee_{i=1}^{n} a <_{\text{lex}}^{i} b$, tak máme alespoň jedno $i$ takové, že $a_i < b_i$ a $a_j = b_j$ pro všechna $j < i$. To ale okamžitě znamená, že $a <_{\text{lex}} b$.
+\end{proof}
 
 \begin{definice}
 Nechť $\pi$ je permutace a $a = (a_1,...,a_n)$. Pak vzorem $pat_i(\pi)$ rozumíme aplikování rovností a nerovnosti z $\pi(a) <_{\text{lex}}^{i} a$ na vektor $a$.
@@ -112,7 +119,7 @@ Nyní pokud libovolný vektor $v$ odpovídá tomuto vzoru, tak o něm automatick
 
 \section{Popis problémů a jejich kódování}
 \subsection{Problém holubníku (Pigeonhole principle)}
-Jako první se podíváme na již několikrát zmiňovaný problém holubníku. Princip holubníku nám říká, že pokud máme $m$ předmětů (holubů), chceme je rozmístit do $n$ kontejnerů (holubníků) a navíc $m>n$, pak musí alespoň jeden kontejner obsahovat více než jeden předmět. Přestože se toto tvrzení zdá být zřejmé, pomáhá vysvětlit spousta zdaleka ne tak zřejmých tvrzení. Tento princip přeformulujeme do tvaru problému následovně. Pro zadaný počet holubů $m$ a počet holubníků $n$ musíme holuby rozmístit do holubníků tak, aby každý holub byl alespoň v jednom holubníku a aby v každém holubníku byl nejvýše jeden holub. Většinou se uvažuje $m=n+1$, takže je problém nesplnitelný. Přestože se výsledek opět zdá být zřejmý, pro SAT solvery je řešení tohoto problému bez rozbíjení symetrií velmi náročné. Proto se tento problém velmi často využívá jako základní benchmark právě pro testování rozbíjení symetrií.
+Jako první se podíváme na již několikrát zmiňovaný problém holubníku. Princip holubníku nám říká, že pokud máme $m$ předmětů (holubů), chceme je rozmístit do $n$ kontejnerů (holubníků) a navíc $m>n$, pak musí alespoň jeden kontejner obsahovat více než jeden předmět. Přestože se toto tvrzení zdá být zřejmé, pomáhá vysvětlit spousta zdaleka ne tak zřejmých tvrzení. Tento princip přeformulujeme do tvaru problému následovně. Pro zadaný počet holubů $m$ a počet holubníků $n$ musíme holuby rozmístit do holubníků tak, aby každý holub byl alespoň v jednom holubníku a aby v každém holubníku byl nejvýše jeden holub. Většinou se uvažuje $m=n+1$, takže je problém nesplnitelný. Přestože se výsledek opět zdá být zřejmý, pro SAT řešiče je řešení tohoto problému bez rozbíjení symetrií velmi náročné \cite{haken85}. Proto se tento problém velmi často využívá jako základní benchmark právě pro testování rozbíjení symetrií.
 
 Kódování tohoto problému do SAT formule je přímočaré. Stejně jako v jednom z předchozích příkladů budeme mít matici binárních proměnných, kde řádky budou odpovídat holubům a sloupce holubníkům. Máme tedy $m\times n$ matici. Proměnné jsou $x_{in+j+1}$, kde $i$ je řádek (holub) a $j$ je sloupec (holubník) a $x_{in+j+1} = 1$, pokud $i$-tý holub je umístěn do $j$-tého holubníku, a $x_{in+j+1}=0$ jinak. Řádky a sloupce budeme v této sekci vždy indexovat od $0$. Kódování podmínek pak vypadá následovně:
 
@@ -136,7 +143,7 @@ V každém holubníku nejvýše jeden holub:
 Jak již bylo také zmíněno, symetrie zde leží v tom, že můžeme mezi sebou permutovat zvlášť holuby a zvlášť holubníky. Můžeme tedy permutovat buď řádky, sloupce, nebo obojí nezávisle na sobě.
 
 \subsection{Problém N královen (N-queens problem)}
-Dalším z vybraných problémů je známý problém N královen. Zde dostaneme na vstupu jediný parametr $n$ a za úkol máme rozmístit $n$ šachových figurek královen na $n\times n$ šachovnici tak, aby se žádné dvě z nich vzájemně neohrožovaly. Řešení tohoto problému pro SAT solvery není až tak náročné i bez rozbíjení symetrií a jedno řešení zvládají rychle najít i pro relativně velká $n$. Avšak celkový počet řešení se zvyšujícím se $n$ stoupá dramaticky a my tím pádem můžeme dobře sledovat, o kolik se celkový počet řešení po rozbíjení symetrií sníží.
+Dalším z vybraných problémů je známý problém N královen. Zde dostaneme na vstupu jediný parametr $n$ a za úkol máme rozmístit $n$ šachových figurek královen na $n\times n$ šachovnici tak, aby se žádné dvě z nich vzájemně neohrožovaly. Řešení tohoto problému pro SAT řešiče není až tak náročné i bez rozbíjení symetrií a jedno řešení zvládají rychle najít i pro relativně velká $n$. Avšak celkový počet řešení se zvyšujícím se $n$ stoupá dramaticky a my tím pádem můžeme dobře sledovat, o kolik se celkový počet řešení po rozbíjení symetrií sníží.
 
 Kódování problému N královen do SAT formule také není složité. Vytvoříme $n\times n$ matici binárních proměnných, kde jednotlivé pozice odpovídají pozicím na šachovnici. Pro $i$-tý řádek a $j$-tý sloupec pak $x_{(i-1)n+j} = 1$, pokud jsme umístili královnu na pozici $(i, j)$, a $x_{(i-1)n+j}=0$ jinak. Nejjednodušší kódování pak dostaneme pro podmínky právě jedné královny v každém řádku, sloupci a na každé diagonále následovně:
 

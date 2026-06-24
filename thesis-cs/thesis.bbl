@@ -19,173 +19,6 @@
 
 \refsection{0}
   \datalist[entry]{none/global//global/global}
-    \entry{DBLP:journals/corr/abs-2406-13557}{article}{}
-      \name{author}{3}{}{%
-        {{hash=fa7f1fcb7fd2d3ba2cbd350f962354f2}{%
-           family={Anders},
-           familyi={A\bibinitperiod},
-           given={Markus},
-           giveni={M\bibinitperiod}}}%
-        {{hash=6d0a2e3e5160e5d235edb3dbd5f73ccf}{%
-           family={Brenner},
-           familyi={B\bibinitperiod},
-           given={Sofia},
-           giveni={S\bibinitperiod}}}%
-        {{hash=5946bff9b80e45dd4a37477605ec45e1}{%
-           family={Rattan},
-           familyi={R\bibinitperiod},
-           given={Gaurav},
-           giveni={G\bibinitperiod}}}%
-      }
-      \strng{namehash}{cbb7289cf1a4c0e8c2b47e8f12351e54}
-      \strng{fullhash}{d0801d7b8569cf7c2f2a2b66cee03e6f}
-      \strng{bibnamehash}{d0801d7b8569cf7c2f2a2b66cee03e6f}
-      \strng{authorbibnamehash}{d0801d7b8569cf7c2f2a2b66cee03e6f}
-      \strng{authornamehash}{cbb7289cf1a4c0e8c2b47e8f12351e54}
-      \strng{authorfullhash}{d0801d7b8569cf7c2f2a2b66cee03e6f}
-      \field{sortinit}{2}
-      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
-      \field{labelnamesource}{author}
-      \field{labeltitlesource}{title}
-      \field{eprinttype}{arXiv}
-      \field{journaltitle}{CoRR}
-      \field{title}{satsuma: Structure-based Symmetry Breaking in {SAT}}
-      \field{volume}{abs/2406.13557}
-      \field{year}{2024}
-      \true{nocite}
-      \verb{doi}
-      \verb 10.48550/ARXIV.2406.13557
-      \endverb
-      \verb{eprint}
-      \verb 2406.13557
-      \endverb
-      \verb{urlraw}
-      \verb https://doi.org/10.48550/arXiv.2406.13557
-      \endverb
-      \verb{url}
-      \verb https://doi.org/10.48550/arXiv.2406.13557
-      \endverb
-    \endentry
-    \entry{10.1007/978-3-319-40970-2_8}{inproceedings}{}
-      \name{author}{4}{}{%
-        {{hash=0f0cc49e455918a610852c68c17c4c3e}{%
-           family={Devriendt},
-           familyi={D\bibinitperiod},
-           given={Jo},
-           giveni={J\bibinitperiod}}}%
-        {{hash=d95018fac68c1595a5da37132d8188e2}{%
-           family={Bogaerts},
-           familyi={B\bibinitperiod},
-           given={Bart},
-           giveni={B\bibinitperiod}}}%
-        {{hash=47832e3503347bd8504d64ba5a70f067}{%
-           family={Bruynooghe},
-           familyi={B\bibinitperiod},
-           given={Maurice},
-           giveni={M\bibinitperiod}}}%
-        {{hash=f86638f13cb0b063c3dcbdc37f91ed41}{%
-           family={Denecker},
-           familyi={D\bibinitperiod},
-           given={Marc},
-           giveni={M\bibinitperiod}}}%
-      }
-      \name{editor}{2}{}{%
-        {{hash=dc9f61df867eb144e9018fc6124e65b3}{%
-           family={Creignou},
-           familyi={C\bibinitperiod},
-           given={Nadia},
-           giveni={N\bibinitperiod}}}%
-        {{hash=124a9c7eb40b2fb42da88f6661060f7b}{%
-           family={Le\bibnamedelima Berre},
-           familyi={L\bibinitperiod\bibinitdelim B\bibinitperiod},
-           given={Daniel},
-           giveni={D\bibinitperiod}}}%
-      }
-      \list{location}{1}{%
-        {Cham}%
-      }
-      \list{publisher}{1}{%
-        {Springer International Publishing}%
-      }
-      \strng{namehash}{569cadfc2cd8ac1e3898b63d694b1db7}
-      \strng{fullhash}{be8e331b07d9a7660891e9b439de85a3}
-      \strng{bibnamehash}{be8e331b07d9a7660891e9b439de85a3}
-      \strng{authorbibnamehash}{be8e331b07d9a7660891e9b439de85a3}
-      \strng{authornamehash}{569cadfc2cd8ac1e3898b63d694b1db7}
-      \strng{authorfullhash}{be8e331b07d9a7660891e9b439de85a3}
-      \strng{editorbibnamehash}{2a666c185400a82c4bcb711c3b66cd36}
-      \strng{editornamehash}{2a666c185400a82c4bcb711c3b66cd36}
-      \strng{editorfullhash}{2a666c185400a82c4bcb711c3b66cd36}
-      \field{sortinit}{3}
-      \field{sortinithash}{ad6fe7482ffbd7b9f99c9e8b5dccd3d7}
-      \field{labelnamesource}{author}
-      \field{labeltitlesource}{title}
-      \field{abstract}{An effective SAT preprocessing technique is the construction of symmetry breaking formulas: auxiliary clauses that guide a SAT solver away from needless exploration of symmetric subproblems. However, during the past decade, state-of-the-art SAT solvers rarely incorporated symmetry breaking. This suggests that the reduction of the search space does not outweigh the overhead incurred by detecting symmetry and constructing symmetry breaking formulas. We investigate three methods to construct more effective symmetry breaking formulas. The first method simply improves the encoding of symmetry breaking formulas. The second detects special symmetry subgroups, for which complete symmetry breaking formulas exist. The third infers binary symmetry breaking clauses for a symmetry group as a whole rather than longer clauses for individual symmetries. We implement these methods in a symmetry breaking preprocessor, and verify their effectiveness on both hand-picked problems as well as the 2014 SAT competition benchmark set. Our experiments indicate that our symmetry breaking preprocessor improves the current state-of-the-art in static symmetry breaking for SAT and has a sufficiently low overhead to improve the performance of modern SAT solvers on hard combinatorial instances.}
-      \field{booktitle}{Theory and Applications of Satisfiability Testing -- SAT 2016}
-      \field{isbn}{978-3-319-40970-2}
-      \field{title}{Improved Static Symmetry Breaking for SAT}
-      \field{year}{2016}
-      \true{nocite}
-      \field{pages}{104\bibrangedash 122}
-      \range{pages}{19}
-    \endentry
-    \entry{inproceedings}{inproceedings}{}
-      \name{author}{7}{}{%
-        {{hash=fca4ae9b6e7f95525362e50001004ae9}{%
-           family={Flener},
-           familyi={F\bibinitperiod},
-           given={Pierre},
-           giveni={P\bibinitperiod}}}%
-        {{hash=72492bee040649d4575ce3044af14fe0}{%
-           family={Frisch},
-           familyi={F\bibinitperiod},
-           given={Alan},
-           giveni={A\bibinitperiod}}}%
-        {{hash=79a2c927ae006cbcc3b545b2c03d7f69}{%
-           family={Hnich},
-           familyi={H\bibinitperiod},
-           given={Brahim},
-           giveni={B\bibinitperiod}}}%
-        {{hash=da751c03399a1fec8a6e6be183f3f436}{%
-           family={Kiziltan},
-           familyi={K\bibinitperiod},
-           given={Zeynep},
-           giveni={Z\bibinitperiod}}}%
-        {{hash=c813bea56d59d6a8d7b3ddae8ff87cbd}{%
-           family={Miguel},
-           familyi={M\bibinitperiod},
-           given={Ian},
-           giveni={I\bibinitperiod}}}%
-        {{hash=2fcc37c54a576bc6aae23b32101ab95c}{%
-           family={Pearson},
-           familyi={P\bibinitperiod},
-           given={Justin},
-           giveni={J\bibinitperiod}}}%
-        {{hash=0083caa546c0b2a86576a95dbef046a9}{%
-           family={Walsh},
-           familyi={W\bibinitperiod},
-           given={Toby},
-           giveni={T\bibinitperiod}}}%
-      }
-      \strng{namehash}{6d7510376ed23a081dd0a2d56fd022f3}
-      \strng{fullhash}{280580d48555b3bdf7305fece14dbfc2}
-      \strng{bibnamehash}{280580d48555b3bdf7305fece14dbfc2}
-      \strng{authorbibnamehash}{280580d48555b3bdf7305fece14dbfc2}
-      \strng{authornamehash}{6d7510376ed23a081dd0a2d56fd022f3}
-      \strng{authorfullhash}{280580d48555b3bdf7305fece14dbfc2}
-      \field{sortinit}{4}
-      \field{sortinithash}{9381316451d1b9788675a07e972a12a7}
-      \field{labelnamesource}{author}
-      \field{labeltitlesource}{title}
-      \field{isbn}{978-3-540-44120-5}
-      \field{month}{08}
-      \field{title}{Breaking Row and Column Symmetries in Matrix Models}
-      \field{year}{2002}
-      \true{nocite}
-      \verb{doi}
-      \verb 10.1007/3-540-46135-3_31
-      \endverb
-    \endentry
     \entry{DBLP:reference/fai/GentPP06}{incollection}{}
       \name{author}{3}{}{%
         {{hash=3920adaed951437e693b40433d344f5e}{%
@@ -235,8 +68,8 @@
       \strng{editorbibnamehash}{6465cdaa8bce6dfa75c72fd8e08a9468}
       \strng{editornamehash}{9b474a3989c3b1345495f69f7ccbb776}
       \strng{editorfullhash}{6465cdaa8bce6dfa75c72fd8e08a9468}
-      \field{sortinit}{5}
-      \field{sortinithash}{20e9b4b0b173788c5dace24730f47d8c}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{booktitle}{Handbook of Constraint Programming}
@@ -244,7 +77,6 @@
       \field{title}{Symmetry in Constraint Programming}
       \field{volume}{2}
       \field{year}{2006}
-      \true{nocite}
       \field{pages}{329\bibrangedash 376}
       \range{pages}{48}
       \verb{doi}
@@ -255,44 +87,6 @@
       \endverb
       \verb{url}
       \verb https://doi.org/10.1016/S1574-6526(06)80014-3
-      \endverb
-    \endentry
-    \entry{codish2025breakingsymmetriessetcoveringperspective}{misc}{}
-      \name{author}{2}{}{%
-        {{hash=803d7e1425f5395a6cd503d8d9ad7680}{%
-           family={Codish},
-           familyi={C\bibinitperiod},
-           given={Michael},
-           giveni={M\bibinitperiod}}}%
-        {{hash=dd3acd180fb6d9b66712fad51611e33a}{%
-           family={Janota},
-           familyi={J\bibinitperiod},
-           given={Mikoláš},
-           giveni={M\bibinitperiod}}}%
-      }
-      \strng{namehash}{fb1ecec78eb28c4af149b123e13df71d}
-      \strng{fullhash}{fb1ecec78eb28c4af149b123e13df71d}
-      \strng{bibnamehash}{fb1ecec78eb28c4af149b123e13df71d}
-      \strng{authorbibnamehash}{fb1ecec78eb28c4af149b123e13df71d}
-      \strng{authornamehash}{fb1ecec78eb28c4af149b123e13df71d}
-      \strng{authorfullhash}{fb1ecec78eb28c4af149b123e13df71d}
-      \field{sortinit}{6}
-      \field{sortinithash}{b33bc299efb3c36abec520a4c896a66d}
-      \field{labelnamesource}{author}
-      \field{labeltitlesource}{title}
-      \field{eprintclass}{cs.LO}
-      \field{eprinttype}{arXiv}
-      \field{title}{Breaking Symmetries from a Set-Covering Perspective}
-      \field{year}{2025}
-      \true{nocite}
-      \verb{eprint}
-      \verb 2502.10056
-      \endverb
-      \verb{urlraw}
-      \verb https://arxiv.org/abs/2502.10056
-      \endverb
-      \verb{url}
-      \verb https://arxiv.org/abs/2502.10056
       \endverb
     \endentry
     \entry{article}{article}{}
@@ -319,8 +113,8 @@
       \strng{authorbibnamehash}{6d860e6d22c9d292dd7525fd82a8aec4}
       \strng{authornamehash}{2466a85773bc43deb68678e8ab20ee43}
       \strng{authorfullhash}{6d860e6d22c9d292dd7525fd82a8aec4}
-      \field{sortinit}{7}
-      \field{sortinithash}{108d0be1b1bee9773a1173443802c0a3}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{journaltitle}{Frontiers in Artificial Intelligence and Applications}
@@ -328,9 +122,147 @@
       \field{title}{Conflict-Driven Clause Learning SAT Solvers}
       \field{volume}{185}
       \field{year}{2009}
-      \true{nocite}
       \verb{doi}
       \verb 10.3233/978-1-58603-929-5-131
+      \endverb
+    \endentry
+    \entry{DBLP:journals/corr/abs-2406-13557}{article}{}
+      \name{author}{3}{}{%
+        {{hash=fa7f1fcb7fd2d3ba2cbd350f962354f2}{%
+           family={Anders},
+           familyi={A\bibinitperiod},
+           given={Markus},
+           giveni={M\bibinitperiod}}}%
+        {{hash=6d0a2e3e5160e5d235edb3dbd5f73ccf}{%
+           family={Brenner},
+           familyi={B\bibinitperiod},
+           given={Sofia},
+           giveni={S\bibinitperiod}}}%
+        {{hash=5946bff9b80e45dd4a37477605ec45e1}{%
+           family={Rattan},
+           familyi={R\bibinitperiod},
+           given={Gaurav},
+           giveni={G\bibinitperiod}}}%
+      }
+      \strng{namehash}{cbb7289cf1a4c0e8c2b47e8f12351e54}
+      \strng{fullhash}{d0801d7b8569cf7c2f2a2b66cee03e6f}
+      \strng{bibnamehash}{d0801d7b8569cf7c2f2a2b66cee03e6f}
+      \strng{authorbibnamehash}{d0801d7b8569cf7c2f2a2b66cee03e6f}
+      \strng{authornamehash}{cbb7289cf1a4c0e8c2b47e8f12351e54}
+      \strng{authorfullhash}{d0801d7b8569cf7c2f2a2b66cee03e6f}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{eprinttype}{arXiv}
+      \field{journaltitle}{CoRR}
+      \field{title}{satsuma: Structure-based Symmetry Breaking in {SAT}}
+      \field{volume}{abs/2406.13557}
+      \field{year}{2024}
+      \verb{doi}
+      \verb 10.48550/ARXIV.2406.13557
+      \endverb
+      \verb{eprint}
+      \verb 2406.13557
+      \endverb
+      \verb{urlraw}
+      \verb https://doi.org/10.48550/arXiv.2406.13557
+      \endverb
+      \verb{url}
+      \verb https://doi.org/10.48550/arXiv.2406.13557
+      \endverb
+    \endentry
+    \entry{inproceedings}{inproceedings}{}
+      \name{author}{7}{}{%
+        {{hash=fca4ae9b6e7f95525362e50001004ae9}{%
+           family={Flener},
+           familyi={F\bibinitperiod},
+           given={Pierre},
+           giveni={P\bibinitperiod}}}%
+        {{hash=72492bee040649d4575ce3044af14fe0}{%
+           family={Frisch},
+           familyi={F\bibinitperiod},
+           given={Alan},
+           giveni={A\bibinitperiod}}}%
+        {{hash=79a2c927ae006cbcc3b545b2c03d7f69}{%
+           family={Hnich},
+           familyi={H\bibinitperiod},
+           given={Brahim},
+           giveni={B\bibinitperiod}}}%
+        {{hash=da751c03399a1fec8a6e6be183f3f436}{%
+           family={Kiziltan},
+           familyi={K\bibinitperiod},
+           given={Zeynep},
+           giveni={Z\bibinitperiod}}}%
+        {{hash=c813bea56d59d6a8d7b3ddae8ff87cbd}{%
+           family={Miguel},
+           familyi={M\bibinitperiod},
+           given={Ian},
+           giveni={I\bibinitperiod}}}%
+        {{hash=2fcc37c54a576bc6aae23b32101ab95c}{%
+           family={Pearson},
+           familyi={P\bibinitperiod},
+           given={Justin},
+           giveni={J\bibinitperiod}}}%
+        {{hash=0083caa546c0b2a86576a95dbef046a9}{%
+           family={Walsh},
+           familyi={W\bibinitperiod},
+           given={Toby},
+           giveni={T\bibinitperiod}}}%
+      }
+      \strng{namehash}{6d7510376ed23a081dd0a2d56fd022f3}
+      \strng{fullhash}{280580d48555b3bdf7305fece14dbfc2}
+      \strng{bibnamehash}{280580d48555b3bdf7305fece14dbfc2}
+      \strng{authorbibnamehash}{280580d48555b3bdf7305fece14dbfc2}
+      \strng{authornamehash}{6d7510376ed23a081dd0a2d56fd022f3}
+      \strng{authorfullhash}{280580d48555b3bdf7305fece14dbfc2}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{isbn}{978-3-540-44120-5}
+      \field{month}{08}
+      \field{title}{Breaking Row and Column Symmetries in Matrix Models}
+      \field{year}{2002}
+      \verb{doi}
+      \verb 10.1007/3-540-46135-3_31
+      \endverb
+    \endentry
+    \entry{codish2025breakingsymmetriessetcoveringperspective}{misc}{}
+      \name{author}{2}{}{%
+        {{hash=803d7e1425f5395a6cd503d8d9ad7680}{%
+           family={Codish},
+           familyi={C\bibinitperiod},
+           given={Michael},
+           giveni={M\bibinitperiod}}}%
+        {{hash=dd3acd180fb6d9b66712fad51611e33a}{%
+           family={Janota},
+           familyi={J\bibinitperiod},
+           given={Mikoláš},
+           giveni={M\bibinitperiod}}}%
+      }
+      \strng{namehash}{fb1ecec78eb28c4af149b123e13df71d}
+      \strng{fullhash}{fb1ecec78eb28c4af149b123e13df71d}
+      \strng{bibnamehash}{fb1ecec78eb28c4af149b123e13df71d}
+      \strng{authorbibnamehash}{fb1ecec78eb28c4af149b123e13df71d}
+      \strng{authornamehash}{fb1ecec78eb28c4af149b123e13df71d}
+      \strng{authorfullhash}{fb1ecec78eb28c4af149b123e13df71d}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{eprintclass}{cs.LO}
+      \field{eprinttype}{arXiv}
+      \field{title}{Breaking Symmetries from a Set-Covering Perspective}
+      \field{year}{2025}
+      \verb{eprint}
+      \verb 2502.10056
+      \endverb
+      \verb{urlraw}
+      \verb https://arxiv.org/abs/2502.10056
+      \endverb
+      \verb{url}
+      \verb https://arxiv.org/abs/2502.10056
       \endverb
     \endentry
     \entry{devriendt2016breakidstaticsymmetrybreaking}{misc}{}
@@ -352,15 +284,14 @@
       \strng{authorbibnamehash}{1edd6bea532bcba7fb5345142050963e}
       \strng{authornamehash}{1edd6bea532bcba7fb5345142050963e}
       \strng{authorfullhash}{1edd6bea532bcba7fb5345142050963e}
-      \field{sortinit}{8}
-      \field{sortinithash}{a231b008ebf0ecbe0b4d96dcc159445f}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{eprintclass}{cs.AI}
       \field{eprinttype}{arXiv}
       \field{title}{BreakID: Static Symmetry Breaking for ASP (System Description)}
       \field{year}{2016}
-      \true{nocite}
       \verb{eprint}
       \verb 1608.08447
       \endverb
@@ -385,15 +316,14 @@
       \strng{authorbibnamehash}{be4b7fe8d65675b2bdd52ee446cd499c}
       \strng{authornamehash}{be4b7fe8d65675b2bdd52ee446cd499c}
       \strng{authorfullhash}{be4b7fe8d65675b2bdd52ee446cd499c}
-      \field{sortinit}{9}
-      \field{sortinithash}{0a5ebc79d83c96b6579069544c73c7d4}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{journaltitle}{Theor.\ Comput.\ Sci.}
       \field{title}{The Intractability of Resolution}
       \field{volume}{39}
       \field{year}{1985}
-      \true{nocite}
       \field{pages}{297\bibrangedash 308}
       \range{pages}{12}
     \endentry
@@ -442,15 +372,14 @@
       \strng{editorbibnamehash}{841c98de6e54c7b5c9528bc182597cd4}
       \strng{editornamehash}{f9fcaa2c32e2498d36687a4bcb3f7418}
       \strng{editorfullhash}{841c98de6e54c7b5c9528bc182597cd4}
-      \field{sortinit}{1}
-      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{month}{5}
       \field{series}{Foundations of Artificial Intelligence}
       \field{title}{Handbook of constraint programming}
       \field{year}{2014}
-      \true{nocite}
     \endentry
     \entry{d4}{inproceedings}{}
       \name{author}{2}{}{%
@@ -471,8 +400,8 @@
       \strng{authorbibnamehash}{5f6c982af76cdb2f7651286e863daa84}
       \strng{authornamehash}{5f6c982af76cdb2f7651286e863daa84}
       \strng{authorfullhash}{5f6c982af76cdb2f7651286e863daa84}
-      \field{sortinit}{1}
-      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{booktitle}{Proceedings of the Twenty-Sixth International Joint Conference on Artificial Intelligence, {IJCAI-17}}
@@ -552,8 +481,8 @@
       \strng{editorbibnamehash}{325912195389141f28f83433304d9cb7}
       \strng{editornamehash}{88ba2ab959b5e0b331306b94139bde9d}
       \strng{editorfullhash}{325912195389141f28f83433304d9cb7}
-      \field{sortinit}{1}
-      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{booktitle}{Proc.~of {SAT Competition} 2024 -- Solver, Benchmark and Proof Checker Descriptions}
@@ -588,14 +517,13 @@
       \strng{authorbibnamehash}{494c3bce0d760426ad5927dbb3970424}
       \strng{authornamehash}{494c3bce0d760426ad5927dbb3970424}
       \strng{authorfullhash}{494c3bce0d760426ad5927dbb3970424}
-      \field{sortinit}{1}
-      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{journaltitle}{Studies in Constructive Mathematics and Mathematical Logic}
       \field{title}{On the complexity of derivations in the propositional calculus}
       \field{year}{1968}
-      \true{nocite}
     \endentry
   \enddatalist
 \endrefsection

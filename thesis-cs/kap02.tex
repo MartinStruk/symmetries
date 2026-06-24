@@ -1,13 +1,6 @@
 %%% Fiktivní kapitola s ukázkami citací
 
 \chapter{Technická dokumentace}
-
-generování kódování problémů, parametry, ukládání do souboru, formát v souboru
-
-hlavní kód, množiny permutací, generování klauzulí
-
-čtení ze souboru, sat solver, zápis výsledku do souboru
-
 \section{Generování vstupních instancí}
 
 Přestože hlavním cílem této práce není generování SAT kódování jednotlivých problémů, ale generování klauzulí pro rozbíjení symetrií nad již existujícími SAT formulemi, bylo pro experimentální část nutné vytvořit také nástroj pro generování testovacích instancí. Ten slouží především k automatizovanému vytváření vstupních formulí pro vybrané problémy popsané v předchozí kapitole.
@@ -36,16 +29,16 @@ Samotné generování klauzulí pro rozbíjení symetrií je realizováno funkc�
 
 Další postup závisí na typu zadané symetrie. Podle toho, zda pracujeme se symetriemi na řádcích, sloupcích, obou dimenzích současně nebo se speciálními typy symetrií používanými u některých problémů, je postupně procházena odpovídající množina zpermutovaných matic. Pro každou takto získanou permutaci je následně původní matice porovnána s její zpermutovanou variantou, z čehož získáváme klauzule pomocí vzorů způsobem popsaným v první kapitole.
 
-Vlastní generování klauzulí probíhá opakovaným voláním funkce $\textproc{GetClauses}$, která je uvedena v Algoritmu 3. Tato funkce postupně vytváří vzory odpovídající jednotlivým možnostem, jak může být zpermutované řešení lexikograficky menší než původní řešení. Z těchto vzorů jsou následně odvozeny CNF klauzule reprezentující Lex-Leader podmínky. Všechny takto získané klauzule jsou průběžně přidávány do výsledné formule.
+Vlastní generování klauzulí probíhá opakovaným voláním funkce $\textproc{GetClauses}$, která je uvedena v Algoritmu 3. Tato funkce postupně vytváří vzory odpovídající jednotlivým možnostem, jak může být zpermutované řešení lexikograficky menší než původní řešení \cite{codish2025breakingsymmetriessetcoveringperspective}. Z těchto vzorů jsou následně odvozeny CNF klauzule reprezentující \textproc{Lex-Leader} podmínky. Všechny takto získané klauzule jsou průběžně přidávány do výsledné formule.
 
-Funkce $\textproc{SymmetryClauses}$ po průchodu celým cyklem už jen vrátí množinu vygenerovaných klauzulí do funkce $\textproc{main}$, kde se společně s celým obsahem vstupního souboru a komentářem obsahující dobu, kterou trvalo generování klauzulí, uloží do výstupního souboru opět ve formátu DIMACS. Název tohoto souboru je tvaru "output$\{problém\}\_\{parametry\}\_\{typ permutace\}\_\{k_{max}\}$.cnf" pro odlišení jednotlivých běhů s různými parametry.
+Funkce $\textproc{SymmetryClauses}$ po průchodu celým cyklem už jen vrátí množinu vygenerovaných klauzulí do funkce $\textproc{main}$, kde se společně s celým obsahem vstupního souboru a komentářem obsahující dobu, kterou trvalo generování klauzulí, uloží do výstupního souboru opět ve formátu DIMACS. Název tohoto souboru je tvaru „output$\{problém\}\_\{parametry\}\_\{typ permutace\}\_\{k_{max}\}$.cnf“ pro odlišení jednotlivých běhů s různými parametry. Tento formát je však použit jen pro testování a verze určena pro obecný vstup vytvoří soubor s názvem vstupního souboru, za který se připojí „\_output“.
 
 Popsaný postup představuje pouze obecný přehled fungování implementace. Jednotlivé části algoritmu, způsob generování permutací i samotný převod vzorů na SAT klauzule budou podrobně rozebrány v následujících sekcích.
 
 \section{Pomocné funkce}
 Než přejdeme k samotnému generování klauzulí pro rozbíjení symetrií, popíšeme nejprve několik pomocných funkcí, které jsou využívány v hlavní části implementace. Jedná se především o funkce pro generování zvolených množin permutací a dále o funkce pro vytvoření matice proměnných a aplikaci permutací na tuto matici.
 
-První skupinu tvoří funkce generující množiny permutací, ze kterých se následně vytvářejí Lex-Leader podmínky. Funkce $\textproc{AllPerm}$ generuje všechny permutace množiny $\{0,\ldots,n-1\}$. Tato volba odpovídá úplnému rozbití symetrie vzhledem k danému typu symetrie, kterou jsme dostali v zadání. Pro tuto množinu permutací ale můžeme potenciálně dostat řádově až $n!$ klauzulí, takže je použitelná jen pro velmi malá zadání.
+První skupinu tvoří funkce generující množiny permutací, ze kterých se následně vytvářejí \textproc{Lex-Leader} podmínky. Funkce $\textproc{AllPerm}$ generuje všechny permutace množiny $\{0,\ldots,n-1\}$. Tato volba odpovídá úplnému rozbití symetrie vzhledem k danému typu symetrie, kterou jsme dostali v zadání. Pro tuto množinu permutací ale můžeme potenciálně dostat řádově až $n!$ klauzulí, takže je použitelná jen pro velmi malá zadání.
 
 Funkce $\textproc{Transpositions}$ generuje všechny transpozice, tedy všechny permutace, které prohodí právě dvě pozice a ostatní ponechají beze změny. Oproti všem permutacím jde o výrazně menší množinu, jelikož není těžké nahlédnout, že počet všech transpozic na $n$ prvcích je $\frac{n(n-1)}{2}$.
 
@@ -54,7 +47,7 @@ $\{(0,1), (1,2), \ldots, (n-2,n-1)\}$. Tyto sousední transpozice tvoří standa
 
 Funkce $\textproc{Randtrans}$ generuje náhodně zvolenou množinu $n-1$ transpozic. Tato množina má stejnou velikost jako množina sousedních transpozic, a proto ji lze využít jako přirozené porovnání s funkcí $\textproc{Neighbors}$. Rozdíl je v tom, že transpozice nejsou voleny podle pevné struktury sousedních prvků, ale náhodně.
 
-Funkce $\textproc{Nongen}$ generuje množinu náhodných transpozic, která obecně negeneruje celou symetrickou grupu ($S_n$). Slouží tedy jako porovnání s množinami permutací, které naopak celou grupu generují. Díky tomu lze v experimentální části sledovat, zda je pro kvalitu částečného rozbití symetrie důležitá samotná velikost množiny permutací, nebo také vlastnost, že generuje danou grupu.
+Funkce $\textproc{Nongen}$ generuje množinu náhodných transpozic, která negeneruje celou symetrickou grupu ($S_n$). Transpozic je opět vždy celkem $n-1$, takže při porovnání s $\textproc{Neighbors}$ a $\textproc{Randtrans}$ lze sledovat, zda je pro kvalitu částečného rozbití důležitá vlastnost, že množina permutací generuje danou grupu. Že množina negeneruje symetrickou grupu je zajištěno jednoduše tím, že se při generování jedna z permutovaných hodnot vyřadí a nemůže se objevit v žádné z transpozic.
 
 Funkce $\textproc{Gen2}$ vrací dvouprvkovou množinu generátorů symetrické grupy. Ta se skládá z cyklu délky $n$ a jedné transpozice. Tato volba je zajímavá především tím, že generuje celou symetrickou grupu pomocí velmi malého počtu permutací.
 
@@ -62,7 +55,7 @@ Funkce $\textproc{DihedralGen}$ je v této práci určena pro problém N králov
 
 Poslední speciální funkcí je $\textproc{SumsNeighbors}$, která je určena pro problém nalezení matice s řádky a sloupci se zadanými součty. V tomto problému nelze libovolně permutovat všechny řádky a sloupce, ale pouze ty, které mají stejný požadovaný součet. Funkce proto nejprve rozdělí indexy podle odpovídajících hodnot součtů a následně v každé takto vzniklé skupině generuje sousední transpozice.
 
-Druhou skupinu pomocných funkcí tvoří funkce $\textproc{GetMatrix}$ a $\textproc{GetPerm}$. Funkce $\textproc{GetMatrix}$, uvedená v Algoritmu 1, vytvoří ($m \times n$) matici proměnných. Proměnné jsou do matice zapisovány postupně po řádcích, tedy stejným způsobem, jakým jsme v teoretické části definovali operaci ($\operatorname{vec}$). Díky tomu je pořadí proměnných v matici přímo kompatibilní s lexikografickým porovnáváním používaným při generování Lex-Leader podmínek.
+Druhou skupinu pomocných funkcí tvoří funkce $\textproc{GetMatrix}$ a $\textproc{GetPerm}$. Funkce $\textproc{GetMatrix}$, uvedená v Algoritmu 1, vytvoří ($m \times n$) matici proměnných. Proměnné jsou do matice zapisovány postupně po řádcích, tedy stejným způsobem, jakým jsme v teoretické části definovali operaci ($\operatorname{vec}$). Díky tomu je pořadí proměnných v matici přímo kompatibilní s lexikografickým porovnáváním používaným při generování \textproc{Lex-Leader} podmínek.
 
 Funkce $\textproc{GetPerm}$, uvedená v Algoritmu 2, aplikuje na zadanou matici permutaci řádků a permutaci sloupců. Pro každý prvek původní matice určí jeho novou pozici podle zadaných permutací a vytvoří tak zpermutovanou matici. Tato funkce se následně používá při vytváření dvojice matic, jejichž vektorizace se porovnávají ve funkci $\textproc{GetClauses}$.
 
@@ -111,11 +104,21 @@ Funkce $\textproc{GetPerm}$, uvedená v Algoritmu 2, aplikuje na zadanou matici 
 \section{Generování klauzulí z porovnání dvou vektorů proměnných}
 
 Nejdůležitější částí implementace je funkce $\textproc{GetClauses}$, uvedená v Algoritmu 3. Tato funkce dostane na vstupu dva vektory proměnných $a$ a $b$, kde $a$ odpovídá vektorizaci původní matice a $b$ vektorizaci její zpermutované varianty. Cílem je vygenerovat klauzule odpovídající podmínce
-$a \leq_{\mathrm{lex}} b$.
+$a \leq_{\text{lex}} b$.
 
-Jak již bylo popsáno v teoretické části, místo přímého kódování této podmínky postupně konstruujeme opačnou situaci, tedy možnost, že $b$ je lexikograficky menší než $a$. Jednotlivé kroky odpovídají tomu, že $b$ je menší než $a$ na $i$-té pozici pro krok $i$. Pro klauzule pak použijeme negace těchto podmínek.
+Jak již bylo popsáno v teoretické části, místo přímého kódování této podmínky postupně konstruujeme opačnou situaci, tedy možnost, že $b$ je lexikograficky menší než $a$. Jednotlivé kroky odpovídají tomu, že $b$ je menší než $a$ na $i$-té pozici pro krok $i$, tedy $b <^i_{\text{lex}} a$. Pro klauzule pak použijeme negace těchto podmínek.
 
-Funkce postupně prochází pozice $i = 0,\ldots,\min(k_{\max}-1,n-1)$. Parametr $k_{\max}$ zde určuje maximální hloubku, do které se vzory generují. Pokud je tedy $k_{\max}$ menší než délka vektoru, neuvažují se všechny možné pozice, ale pouze určitá počáteční část vektorů. Tím lze regulovat počet vygenerovaných klauzulí.
+Funkce postupně prochází pozice $i = 0,\ldots,\min(k_{\max}-1,n-1)$. Parametr $k_{\max}$ zde určuje maximální hloubku, do které se vzory generují. Pokud je tedy $k_{\max}$ menší než délka vektoru, neuvažují se všechny možné pozice, ale pouze $b <^i_{\text{lex}} a$ pro všechna $i \leq k_{\max}$. Tím lze regulovat počet vygenerovaných klauzulí.
+
+Regulace hloubky generování klauzulí je velmi důležitá. Zpravidla jsou totiž podmínky získané z $b <^i_{\text{lex}} a$ efektivnější pro menší $i$. Je to dáno především tím, že proměnné vyskytující se později ve vektoru proměnných mají nižší váhu a také část získaných podmínek může být už pokryta dříve vygenerovanými omezeními. Samotné generování klauzulí pro vyšší $k_{\max}$ také vede k delšímu času generování. Proto bychom mohli hledat „optimální“ $k_{\max}$, pro které rozbijeme dostatek symetrií, aby běh SAT řešiče byl dostatečně rychlý, ale pro které zároveň generování klauzulí netrvá příliš dlouho. Důležité je také poznamenat, že množina řešení je monotónně nerostoucí s rostoucím $k_{\max}$. To popíšeme následujícím lemmatem.
+
+\begin{lemma}[Monotónnost množiny řešení podle $k_{\max}$]
+Nechť $P$ je množina permutací, které odpovídají symetriím formule $F$. Označme $F_{P,k}$ formuli vzniklou z formule $F$ přidáním klauzulí generovaných z permutací $P$ do hloubky $k$, neboli přidáním podmínek získaných negací podmínek $\pi(x) <^i_{\text{lex}} x$ pro všechna $\pi \in P$ a všechna $i=1,...,k$. Pokud $k_1\leq k_2$, pak množina řešení formule $F_{P,k_2}$ musí být obsažena v množině řešení formule $F_{P,k_1}$.
+\end{lemma}
+
+\begin{proof}
+Pokud máme $k_1\leq k_2$, pak se v obou případech přidají podmínky získané negací podmínek $\bigvee_{\pi \in P} \bigvee_{i=1}^{k_1} \pi(x) <_{\text{lex}}^{i} x$. Pro $k_2$ pak navíc přibydou další podmínky pro $i=k_1+1,...,k_2$. Jelikož je tedy množina podmínek pro $k_1$ podmnožinou množiny podmínek pro $k_2$, musí každé řešení formule $F_{P,k_2}$ být zároveň řešením formule $F_{P,k_1}$. Žádná řešení tedy nemohou přibýt, mohou být pouze dalšími podmínkami odstraněna.
+\end{proof}
 
 V každém kroku se uvažuje vzor odpovídající situaci, kdy jsou vektory $a$ a $b$ na všech předchozích pozicích stejné a na pozici $i$ platí $b_i < a_i$. Jelikož pracujeme s binárními proměnnými, znamená tato ostrá nerovnost podmínky $b_i = 0$ a $a_i = 1$. Pokud je proměnná $a_i$ rovna proměnné $b_i$, daná pozice nemůže být první pozicí, na které je $b$ ostře menší než $a$, a proto se přeskočí.
 
@@ -131,11 +134,11 @@ Pokud je proměnná v daném vzoru ekvivalentní hodnotě $0$, přidá se do vý
 
 Zbývajícím případem je situace, kdy je proměnná ekvivalentní jiné proměnné, ale nikoliv přímo konstantě. V takovém případě je potřeba v negaci vzoru vyjádřit podmínku, že tyto dvě proměnné nemají stejnou hodnotu. Pro tuto nerovnost se zavádí pomocná proměnná reprezentující vztah $(x \neq y)$ pro proměnné $x$ a $y$. Aby nebylo nutné pro stejnou dvojici proměnných vytvářet pomocnou proměnnou opakovaně, uchovává se jejich reprezentace ve struktuře $aux$.
 
-Převod těchto pomocných podmínek do CNF tvaru je proveden pomocí Tseitinovy transformace. Pro novou pomocnou proměnnou $t$, která reprezentuje vztah $x \neq y$, jsou přidány klauzule zajišťující ekvivalenci
+Převod těchto pomocných podmínek do CNF tvaru je proveden pomocí Tseitinovy transformace \cite{tseitin68}. Pro novou pomocnou proměnnou $t$, která reprezentuje vztah $x \neq y$, jsou přidány klauzule zajišťující ekvivalenci
 $t \leftrightarrow (x \neq y)$.
-Díky tomu lze v klauzuli použít pouze literál $t$, zatímco samotná definice vztahu $t$ a $x \neq y$ je zachycena samostatnými klauzulemi.
+Díky tomu lze v klauzuli použít pouze literál $t$, zatímco definice vztahu $t$ a $x \neq y$ je zachycena samostatnými klauzulemi \cite{tseitin68}.
 
-Po zpracování všech aktivních proměnných se výsledná klauzule přidá do množiny všech vygenerovaných klauzulí pro tuto dvojici vektorů proměnných. Tato klauzule zakazuje $b <^i_{\mathrm{lex}} a$. Opakováním tohoto postupu pro všechny uvažované pozice $i$ získáme klauzule, které zakazují, aby zpermutovaná varianta byla lexikograficky menší než původní řešení. Tím je dosaženo požadované podmínky $a \leq_{\mathrm{lex}} b$, případně její omezené varianty určené parametrem $k_{\max}$.
+Po zpracování všech aktivních proměnných se výsledná klauzule přidá do množiny všech vygenerovaných klauzulí pro tuto dvojici vektorů proměnných. Tato klauzule zakazuje $b <^i_{\mathrm{lex}} a$. Opakováním tohoto postupu pro všechny uvažované pozice $i$ získáme klauzule, které zakazují, aby zpermutovaná varianta byla lexikograficky menší než původní řešení. Tím je dosaženo požadované podmínky $a \leq_{\text{lex}} b$, případně její omezené varianty určené parametrem $k_{\max}$.
 
 
 \begin{algorithm}[H]
@@ -203,8 +206,8 @@ Funkce $\textproc{SymmetryClauses}$ tak tvoří zastřešující vrstvu celé im
 
 \ForAll{$(\pi_r, \pi_c) \in perms$}
     	\State $M' \gets $\Call{GetPerm}{$M, \pi_r, \pi_c$}
-    	\State $a\gets \mathrm{vec}(M)$
-    	\State $b\gets \mathrm{vec}(M')$
+    	\State $a\gets \text{vec}(M)$
+    	\State $b\gets \text{vec}(M')$
     	\State $(C_\pi,aux)\gets$\Call{GetClauses}{$a,b,k_{\max},aux$}
     	\State $C\gets C\cup C_\pi$
 \EndFor
