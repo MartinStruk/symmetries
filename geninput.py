@@ -8,6 +8,7 @@ from pysat.formula import CNF
 import itertools
 import random
 import argparse
+from itertools import combinations
 
 # formule pro pigeon hole principle problém
 def phpformula(p, h):
@@ -75,7 +76,7 @@ def nqueens(n):
 
     return clauses
 
-# fromule pro problém nalezení matice s řádky a sloupci se zadaným součtem
+# fromule pro problém nalezení matice s řádky a sloupci se zadanými součty
 def rcsums(row_sums, col_sums):
     m = len(row_sums)
     n = len(col_sums)
@@ -171,10 +172,7 @@ def latinsq(n):
 
     return clauses
 
-    from pysat.formula import CNF
-from itertools import combinations
-
-# problém sociálních golfistů
+# problém společenských golfistů
 def golf(g, ppg, w):
     n = g * ppg  
 
@@ -207,7 +205,7 @@ def golf(g, ppg, w):
             for subset in combinations(players, ppg + 1):
                 clauses.append([-v for v in subset])
 
-    # žádný pár se nepotká dvakrát (nebo vícekrát)
+    # žádný pár se nepotká dvakrát
     for i in range(n):
         for j in range(i + 1, n):
             for w1 in range(w):
@@ -231,17 +229,17 @@ def main():
 
     parser.add_argument("n", type=int, help="Hodnota n pro problém n královen (N-queens)")
 
-    parser.add_argument("rc", type=int, help="Počet řádků a sloupců pro náhodně generované hodnoty pro problém nalezení matice s řádky a sloupci se zadaným součtem \nAby byl celkový součet ve všech řádcích roven celkovému součtu ve všech sloupcích, přidá se buď jeden řádek navíc, nebo jeden sloupec navíc")
+    parser.add_argument("rc", type=int, help="Počet řádků a sloupců pro náhodně generované hodnoty pro problém nalezení matice s řádky a sloupci se zadanými součty \nAby byl celkový součet ve všech řádcích roven celkovému součtu ve všech sloupcích, přidá se buď jeden řádek navíc, nebo jeden sloupec navíc")
     
     parser.add_argument("rcrand", type=int, help="Maximální hodnota, která se může náhodně vygenerovat pro součet v konkrétním řádku nebo sloupci")
     
     parser.add_argument("lsq", type=int, help="Rozměr matice pro problém latinských čtverců")
     
-    parser.add_argument("g", type=int, help="Počet skupin pro problém sociálních golfistů")
+    parser.add_argument("g", type=int, help="Počet skupin pro problém společenských golfistů")
     
-    parser.add_argument("p", type=int, help="Počet hráčů pro problém sociálních golfistů")
+    parser.add_argument("p", type=int, help="Počet hráčů pro problém společenských golfistů")
     
-    parser.add_argument("w", type=int, help="Počet týdnů pro problém sociálních golfistů")
+    parser.add_argument("w", type=int, help="Počet týdnů pro problém společenských golfistů")
 
     args = parser.parse_args()
 
@@ -290,22 +288,27 @@ def main():
     
     with open("inputphp.cnf", "w") as f:
         f.write(f"c {pig} {hol} rc\n")
+        f.write(f"c pig{pig}_hol{hol}\n")
         cnfp.to_fp(f)
     
     with open("inputqueens.cnf", "w") as f:
         f.write(f"c {n} {n} d\n")
+        f.write(f"c n{n}\n")
         cnfq.to_fp(f)
         
     with open("inputrcsums.cnf", "w") as f:
         f.write(f"c {len(rsums)} {len(csums)} sums{sumdata}\n")
+        f.write(f"c rc{args.rc}_rcrand{args.rcrand}\n")
         cnfrc.to_fp(f)
 
     with open("inputlatinsq.cnf", "w") as f:
         f.write(f"c {lsq*lsq} {lsq} rc3d{lsq}\n")
+        f.write(f"c lsq{lsq}\n")
         cnflsq.to_fp(f)
 
     with open("inputgolf.cnf", "w") as f:
         f.write(f"c {p*w*g} {g} rc3d{p*g}\n")
+        f.write(f"c g{g}_p{p}_w{w}\n")
         cnfg.to_fp(f)
         
 if __name__ == "__main__":

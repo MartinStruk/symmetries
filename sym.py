@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[33]:
+# In[4]:
 
 
 from pysat.formula import CNF
@@ -56,6 +56,7 @@ def randtrans(n):
 
     return result
 
+# náhodné transpozice, které negenerují celou symterickou grupu (pokud je n>3)
 def nongen(n):
     idp = list(range(n))
     seen = set()
@@ -104,7 +105,7 @@ def dihedral_gen(n):
 
     return [rot, refl]
 
-# sousední transpozice pro problém nalezení matice se řádky a sloupci se zadaným součtem
+# sousední transpozice pro problém nalezení matice s řádky a sloupci se zadanými součty
 def sums_neighbors(values):
     groups = defaultdict(list)
     n = len(values)
@@ -125,7 +126,7 @@ def sums_neighbors(values):
     return transpositions
 
 
-# In[34]:
+# In[5]:
 
 
 # vytvoření matice s proměnnými
@@ -190,7 +191,7 @@ def get_clauses(a, b, kmax, aux):
 
         # přidání klauzulí
         for j in range(len(active)):
-            # proměnná je ve ekvivalentní s 0
+            # proměnná je ekvivalentní s 0
             if canon[j] == cO:
                 clause.append(active[j])
 
@@ -306,7 +307,7 @@ def symmetry_clauses(matrix, symtype, perms, kmax):
             clauses += cls[0]
             aux = cls[1]
 
-    # pro problém nalezení matice se řádky a sloupci se zadaným součtem 
+    # pro problém nalezení matice s řádky a sloupci se zadanými součty 
     elif symtype[:4] == "sums":
         values = symtype[4:]
         rc = values.split('|')
@@ -334,7 +335,7 @@ def symmetry_clauses(matrix, symtype, perms, kmax):
 
     # pro matice trojrozměrných problémů, které jsou přepsané do dvourozměrné matice
     elif symtype[:4] == "rc3d":
-        row2d = int(symtype[4])
+        row2d = int(symtype[4:])
         val3d = m//row2d
         idpr2d = list(range(row2d))
         idpv = list(range(val3d))
@@ -345,24 +346,26 @@ def symmetry_clauses(matrix, symtype, perms, kmax):
         col.append(idpc)
         val = perms(val3d)
         val.append(idpv)
+        
         for p in col:
             permc = get_perm(matrix, idpr, p)
             matrix3d = [permc[(i)*row2d:(i+1)*row2d] for i in range(val3d)]
-
             for q in row:
                 permr = [get_perm(matrix3d[i],q,idpc) for i in range(val3d)]
                 
                 for r in val:
+                    if p == idpc and q == idpr2d and r == idpv:
+                        continue
                     a = []
                     b = []  
                     for i in range(val3d):
                         for j in range(row2d):
                             a = a + matrix[i*row2d+j]
                             b = b + permr[r[i]][j]
-                            
-                cls = get_clauses(a, b, kmax, aux)
-                clauses += cls[0]
-                aux = cls[1]
+            
+                    cls = get_clauses(a, b, kmax, aux)
+                    clauses += cls[0]
+                    aux = cls[1]
 
                 
     else:
@@ -371,11 +374,11 @@ def symmetry_clauses(matrix, symtype, perms, kmax):
     return clauses
 
 
-# In[21]:
+# In[7]:
 
 
 """# načtení zadání ze souboru
-cnf = CNF(from_file="inputgolf.cnf")
+cnf = CNF(from_file="outputgolf_g5_p4_w4_neighbors_k100.cnf")
 info = cnf.comments[0].split()
 
 # získání klauzulí pro rozbití symetrií
@@ -397,7 +400,7 @@ print(" ")
 print("SAT solver: ", (time.time() - s) * 1e3, "ms")"""
 
 
-# In[22]:
+# In[102]:
 
 
 def main():
@@ -415,18 +418,32 @@ def main():
 
     cnf = CNF(from_file=args.problem)
     info = cnf.comments[0].split()
+    params = cnf.comments[1].split()[1]
 
     if args.mc:
         cnf.comments.append("c t pmc")
         cnf.comments.append("c p show " + " ".join(map(str, list(range(1, int(info[1])*int(info[2])+1)))) + " 0")
         
     perms = {"all_perm":all_perm, "transpositions":transpositions, "neighbors":neighbors, "randtrans":randtrans, "nongen":nongen, "gen2":gen2, "dihedral_gen":dihedral_gen, "sums_neighbors":sums_neighbors}
+
     
+    s = time.time()
     clauses = symmetry_clauses(get_matrix(int(info[1]),int(info[2])), info[3], perms[args.permutace], args.k)
+    timetogen = (time.time() - s) * 1e3
+
+    cnf.comments.append(f"c time {timetogen} ms")
+    
     for clause in clauses:
       cnf.append(clause)
-   
-    cnf.to_file("output.cnf")
+
+    if args.k < 10:
+        kk = f"00{args.k}"
+    elif args.k < 100:
+        kk = f"0{args.k}"
+    else:
+        kk = str(args.k)
+        
+    cnf.to_file(f"output{args.problem[5:-4]}_{params}_{args.permutace}_k{kk}.cnf")
     
 if __name__ == "__main__":
     main()
