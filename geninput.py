@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
-
-
 from pysat.formula import CNF
 import itertools
 import random
@@ -216,10 +210,6 @@ def golf(g, ppg, w):
 
     return clauses
 
-
-# In[2]:
-
-
 def main():
     parser = argparse.ArgumentParser(description = "Možnosti pro vstupní argumenty:", formatter_class=argparse.RawTextHelpFormatter)
 
@@ -313,10 +303,3 @@ def main():
         
 if __name__ == "__main__":
     main()
-
-
-# In[ ]:
-
-
-
-

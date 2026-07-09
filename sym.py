@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[4]:
-
-
 from pysat.formula import CNF
 from pysat.solvers import Solver
 from itertools import permutations
@@ -124,10 +118,6 @@ def sums_neighbors(values):
                 transpositions.append(swap_positions(idp, a, b))
 
     return transpositions
-
-
-# In[5]:
-
 
 # vytvoření matice s proměnnými
 def get_matrix(m, n):
@@ -373,36 +363,6 @@ def symmetry_clauses(matrix, symtype, perms, kmax):
 
     return clauses
 
-
-# In[7]:
-
-
-"""# načtení zadání ze souboru
-cnf = CNF(from_file="outputgolf_g5_p4_w4_neighbors_k100.cnf")
-info = cnf.comments[0].split()
-
-# získání klauzulí pro rozbití symetrií
-s = time.time()
-clauses = symmetry_clauses(get_matrix(int(info[1]),int(info[2])), info[3], neighbors, 2000)
-for clause in clauses:
-  cnf.append(clause)
-
-print("Symmetries: ", (time.time() - s) * 1e3, "ms")
-print(" ")
-
-# spuštění SAT solveru
-s = time.time()
-with Solver(bootstrap_with=cnf) as solver:
-    print('formula is', f'{"S" if solver.solve() else "UNS"}ATisfiable')
-    #print('and the model is:', solver.get_model())
-
-print(" ")
-print("SAT solver: ", (time.time() - s) * 1e3, "ms")"""
-
-
-# In[102]:
-
-
 def main():
     parser = argparse.ArgumentParser(description = "Možnosti pro vstupní argumenty:", formatter_class=argparse.RawTextHelpFormatter)
 
@@ -447,10 +407,3 @@ def main():
     
 if __name__ == "__main__":
     main()
-
-
-# In[ ]:
-
-
-
-

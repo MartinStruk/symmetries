@@ -1,0 +1,237 @@
+%%% Fiktivní kapitola s ukázkami citací
+
+\chapter{Technická dokumentace}
+\section{Generování vstupních instancí}
+
+Přestože hlavním cílem této práce není generování SAT kódování jednotlivých problémů, ale generování klauzulí pro rozbíjení symetrií nad již existujícími SAT formulemi, bylo pro experimentální část nutné vytvořit také nástroj pro generování testovacích instancí. Ten slouží především k automatizovanému vytváření vstupních formulí pro vybrané problémy popsané v předchozí kapitole.
+
+Program je implementován jako samostatný skript s názvem \texttt{geninput.py} spouštěný z příkazové řádky. Při spuštění musíme zadat parametry pro všechny použité problémy. Samotné generování SAT formulí přímo odpovídá kódováním uvedeným v sekci 1.3. Pro každý z problémů je implementována samostatná funkce vytvářející množinu klauzulí podle příslušných podmínek. Jelikož se jedná pouze o technickou realizaci již popsaných formulací, nebudeme zde jednotlivé algoritmy detailně rozebírat.
+
+Určitou výjimku představuje problém nalezení matice s řádky a sloupci se zadanými součty. Obecně lze zadat libovolné posloupnosti požadovaných řádkových a sloupcových součtů, jejichž celkové součty jsou shodné. Pro účely experimentů však byly tyto hodnoty generovány náhodně. Nejprve jsou nezávisle vygenerovány náhodné součty pro zadaný počet řádků a sloupců. Následně je podle potřeby přidán jeden dodatečný řádek nebo sloupec tak, aby byl celkový součet řádkových a sloupcových požadavků stejný. Tím je zajištěno, že vzniklá instance splňuje základní nutnou podmínku existence řešení.
+
+Vygenerované SAT formule jsou ukládány ve formátu DIMACS CNF \cite{dimacs1993cnf}, který představuje standard pro výměnu SAT instancí mezi jednotlivými nástroji. Soubor obsahuje hlavičku určující počet proměnných a klauzulí a dále seznam jednotlivých klauzulí. Každá klauzule je zapsána jako posloupnost celých čísel reprezentujících literály a je ukončena hodnotou $0$. Literály jsou celými čísly reprezentovány v celé implementaci nástroje. Kladná hodnota označuje proměnnou, záporná hodnota její negaci. Pro každý problém je vygenerován samostatný soubor tvaru \texttt{input$\{problém\}$.cnf}.
+
+Formát DIMACS zároveň umožňuje používat komentáře zapsané v souboru řádkem začínajícím znakem „c“. Této možnosti je v implementaci využito k ukládání doplňujících informací, které nejsou součástí samotné SAT formule, ale jsou potřebné při následném generování klauzulí pro rozbíjení symetrií. Do komentářů jsou ukládány zejména údaje o rozměrech binární matice reprezentující řešení problému a o typu uvažované symetrie. Dále jsou v komentářích ukládané parametry zadaného problému, které se využívají pro pojmenování výstupních souborů po generování klauzulí pro rozbíjení symetrií.
+
+Informace předávané v komentářích jsou pro nás klíčové, jelikož předpokládáme, že známe symetrie zadaného problému, ale nástroj pro generování klauzulí pro rozbíjení symetrií ze samotné zadané formule tyto informace není schopen získat.
+
+Při implementaci byla využita třída \texttt{CNF} z knihovny \texttt{pysat} \cite{imms-sat18}.
+
+\section{Generování klauzulí}
+
+Hlavní část implementace je soustředěna v souboru \texttt{sym.py}, který představuje vlastní nástroj pro generování klauzulí pro rozbíjení symetrií. Na rozdíl od programu popsaného v předchozí sekci již tento nástroj nepracuje s konkrétním problémem, ale pouze s jeho SAT formulací a informacemi o příslušných symetriích. Díky tomu jej lze použít pro libovolný problém, pro který známe odpovídající množinu symetrií a vhodnou reprezentaci proměnných binární maticí.
+
+Stejně jako program pro generování vstupních instancí je i tento nástroj spouštěn z příkazové řádky. Při spuštění je potřeba zadat vstupní soubor ve formátu DIMACS, zvolenou množinu permutací, maximální hloubku generování klauzulí $k_{max}$ a informaci o tom, zda bude výsledná formule použita pouze pro rozhodování o splnitelnosti, nebo také pro určení celkového počtu řešení.
+
+Po načtení vstupního souboru program získá z komentářů informace uložené při generování instance. Jedná se zejména o rozměry binární matice reprezentující řešení problému a o typ symetrie, se kterým má dále pracovat. Tyto údaje jsou následně využity při vytvoření matice proměnných a při volbě odpovídajícího způsobu generování permutací. Dále jsou načteny parametry původního problému, které se využívají jen při vytváření názvů výstupních souborů.
+
+Samotné generování klauzulí pro rozbíjení symetrií je realizováno funkcí $\texttt{SymmetryClauses}$, která je uvedena v Algoritmu 4. Této funkci je předána matice proměnných vygenerována funkcí $\texttt{GetMatrix}$ (Algoritmus 1), typ symetrie, zvolená množina permutací a parametr $k_{max}$. Funkce si udržuje seznam již vygenerovaných klauzulí a zároveň eviduje pomocné proměnné vytvářené během převodu vzorů do CNF.
+
+Další postup závisí na typu zadané symetrie. Podle toho, zda pracujeme se symetriemi na řádcích, sloupcích, obou dimenzích současně nebo se speciálními typy symetrií používanými u některých problémů, je postupně procházena odpovídající množina zpermutovaných matic. Pro každou takto získanou permutaci je následně původní matice porovnána s její zpermutovanou variantou, z čehož získáváme klauzule pomocí vzorů způsobem popsaným v první kapitole.
+
+Vlastní generování klauzulí probíhá opakovaným voláním funkce $\texttt{GetClauses}$, která je uvedena v Algoritmu 3. Tato funkce postupně vytváří vzory odpovídající jednotlivým možnostem, jak může být zpermutované řešení lexikograficky menší než původní řešení \cite{codish2025breakingsymmetriessetcoveringperspective}. Z těchto vzorů jsou následně odvozeny CNF klauzule reprezentující \texttt{Lex-Leader} podmínky. Všechny takto získané klauzule jsou průběžně přidávány do výsledné formule.
+
+Funkce $\texttt{SymmetryClauses}$ po průchodu celým cyklem už jen vrátí množinu vygenerovaných klauzulí do funkce $\texttt{main}$. Zde se společně s celým obsahem vstupního souboru a komentářem obsahující dobu, kterou trvalo generování klauzulí, uloží do výstupního souboru opět ve formátu DIMACS. Název tohoto souboru je ve tvaru \texttt{output$\{problém\}\_\{parametry\}\_\{typ permutace\}\_\{k_{max}\}$.cnf} pro odlišení jednotlivých běhů s různými parametry. Tento formát je však použit jen pro testování a verze určena pro obecný vstup vytvoří soubor s názvem vstupního souboru, před který se připojí přípona \texttt{output\_}.
+
+Popsaný postup představuje pouze obecný přehled fungování implementace. Jednotlivé části algoritmu, způsob generování permutací i samotný převod vzorů na SAT klauzule budou podrobně rozebrány v následujících sekcích.
+
+Stejně jako při generování vstupních instancí byla i při implementaci generování klauzulí pro rozbíjení symetrií využita třída \texttt{CNF} z knihovny \texttt{pysat} \cite{imms-sat18}.
+
+\section{Pomocné funkce}
+Než přejdeme k samotnému generování klauzulí pro rozbíjení symetrií, popíšeme nejprve několik pomocných funkcí, které jsou využívány v hlavní části implementace. Jedná se především o funkce pro generování zvolených množin permutací a dále o funkce pro vytvoření matice proměnných a aplikaci permutací na tuto matici.
+
+První skupinu tvoří funkce generující množiny permutací, ze kterých se následně vytvářejí \texttt{Lex-Leader} podmínky. Funkce $\texttt{AllPerm}$ generuje všechny permutace množiny $\{0,\ldots,n-1\}$. Tato volba odpovídá úplnému rozbití symetrie vzhledem k danému typu symetrie, kterou jsme dostali v zadání. Pro tuto množinu permutací ale můžeme potenciálně dostat řádově až $n!$ klauzulí \cite{haken85}, takže je použitelná jen pro velmi malá zadání.
+
+Funkce $\texttt{Transpositions}$ generuje všechny transpozice, tedy všechny permutace, které prohodí právě dvě pozice a ostatní ponechají beze změny. Oproti všem permutacím jde o výrazně menší množinu, jelikož není těžké nahlédnout, že počet všech transpozic na $n$ prvcích je $\frac{n(n-1)}{2}$.
+
+Funkce $\texttt{Neighbors}$ generuje pouze transpozice sousedních pozic. Pro $n$ prvků tedy vznikne množina
+$\{(0,1), (1,2), \ldots, (n-2,n-1)\}$, která obsahuje přesně $n-1$ prvků. Tyto sousední transpozice tvoří standardní množinu generátorů symetrické grupy ($S_n$). Právě proto je tato množina důležitá při porovnávání vlivu generujících množin permutací na kvalitu částečného rozbití symetrie.
+
+Funkce $\texttt{Randtrans}$ generuje náhodně zvolenou množinu $n-1$ transpozic. Tato množina má stejnou velikost jako množina sousedních transpozic, a proto ji lze využít jako přirozené porovnání s funkcí $\texttt{Neighbors}$. Rozdíl je v tom, že transpozice nejsou voleny podle sousedních prvků, ale volí se náhodně.
+
+Funkce $\texttt{Nongen}$ generuje množinu náhodných transpozic, která negeneruje celou symetrickou grupu ($S_n$). Transpozic je opět vždy celkem $n-1$, takže při porovnání s $\texttt{Neighbors}$ a $\texttt{Randtrans}$ lze sledovat, zda je pro kvalitu částečného rozbití důležitá vlastnost, že množina permutací generuje danou grupu. Že množina negeneruje symetrickou grupu je zajištěno jednoduše tím, že se při generování jedna z permutovaných hodnot vyřadí a nemůže se objevit v žádné z transpozic.
+
+Funkce $\texttt{Gen2}$ vrací dvouprvkovou množinu generátorů symetrické grupy. Ta se skládá z cyklu délky $n$ a jedné transpozice. Tato volba je zajímavá především tím, že generuje celou symetrickou grupu pomocí velmi malého počtu permutací.
+
+Funkce $\texttt{DihedralGen}$ je v této práci využívána především pro problém N královen. V tomto případě nelze libovolně permutovat řádky a sloupce, protože by se obecně nezachovaly diagonální podmínky. Symetrie šachovnice jsou proto reprezentovány pomocí rotace o $90^\circ$ a reflexe podle svislé osy. Tyto dvě permutace generují dihedrální grupu symetrií čtverce. Tuto množinu permutací by samozřejmě bylo možné použít i pro jiné problémy s tímto typem symetrie.
+
+Poslední speciální funkcí je $\texttt{SumsNeighbors}$, která je určena pro problém nalezení matice s řádky a sloupci se zadanými součty. V tomto problému nelze libovolně permutovat všechny řádky a sloupce, ale pouze ty, které mají stejný požadovaný součet. Funkce proto nejprve rozdělí indexy podle odpovídajících hodnot součtů a následně v každé takto vzniklé skupině generuje sousední transpozice.
+
+Druhou skupinu pomocných funkcí tvoří funkce $\texttt{GetMatrix}$ a $\texttt{GetPerm}$. Funkce $\texttt{GetMatrix}$, uvedená v Algoritmu 1, vytvoří ($m \times n$) matici proměnných. Proměnné jsou do matice zapisovány postupně po řádcích, tedy stejným způsobem, jakým jsme v teoretické části definovali operaci $\operatorname{vec}$.
+
+Funkce $\texttt{GetPerm}$, uvedená v Algoritmu 2, aplikuje na zadanou matici permutaci řádků a permutaci sloupců. Pro každý prvek původní matice určí jeho novou pozici podle zadaných permutací a vytvoří tak zpermutovanou matici. Tato funkce se následně používá při vytváření dvojice matic, jejichž vektorizace se porovnávají ve funkci $\texttt{GetClauses}$.
+
+
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\Function{GetMatrix}{$m, n$}
+    	\State $variables \gets m\times n$ nulová matice
+    	\State $idx \gets 1$
+    
+	\For{$i \gets 0$ \textbf{to} $m-1$}
+        	\For{$j \gets 0$ \textbf{to} $n-1$}
+            		\State $variables_{i,j} \gets idx$
+            		\State $idx \gets idx + 1$
+        	\EndFor
+    	\EndFor
+    
+    	\State \Return $variables$
+\EndFunction
+\end{algorithmic}
+\caption{Vytvoření matice proměnných}
+\end{algorithm}
+
+
+
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\Function{GetPerm}{$matrix, \pi_r, \pi_c$}
+    	\State $m \gets$ \#řádků $matrix$
+    	\State $n \gets$ \#sloupců $matrix$
+    
+    	\State $varperm \gets m\times n$ nulová matice 
+    
+	\For{$i \gets 0$ \textbf{to} $m-1$}
+        	\For{$j \gets 0$ \textbf{to} $n-1$}
+            		\State $varperm_{\pi_r(i),\pi_c(j)} \gets matrix_{i,j}$
+        	\EndFor
+    	\EndFor
+    
+    	\State \Return $varperm$
+\EndFunction
+\end{algorithmic}
+\caption{Aplikace permutací na matici}
+\end{algorithm}
+
+\section{Generování klauzulí z porovnání dvou vektorů proměnných}
+
+Nejdůležitější částí implementace je funkce $\texttt{GetClauses}$, uvedená v Algoritmu 3. Tato funkce dostane na vstupu dva vektory proměnných $a$ a $b$, kde $a$ odpovídá vektorizaci původní matice a $b$ vektorizaci její zpermutované varianty. Cílem je vygenerovat klauzule odpovídající podmínce
+$a \leq_{\text{lex}} b$.
+
+Jak již bylo popsáno v teoretické části, místo přímého kódování této podmínky postupně konstruujeme opačnou situaci, tedy možnost, že $b$ je lexikograficky menší než $a$. Jednotlivé kroky odpovídají tomu, že $b$ je menší než $a$ na $i$-té pozici pro krok $i$, tedy $b <^i_{\text{lex}} a$. Pro klauzule pak použijeme negace těchto podmínek.
+
+Funkce postupně prochází pozice $i = 1,\ldots,\min(k_{\max},n)$. Parametr $k_{\max}$ zde určuje maximální hloubku, do které se vzory generují. Pokud je tedy $k_{\max}$ menší než délka vektoru, neuvažují se všechny možné pozice, ale pouze $b <^i_{\text{lex}} a$ pro všechna $i \leq k_{\max}$. Tím lze regulovat počet vygenerovaných klauzulí.
+
+\begin{prikl}
+Uvedeme si jednoduchý příklad pro vektory proměnných $$a=(x_1, x_2, x_3, x_4, x_5), b=(x_2, x_3, x_1, x_4, x_5).$$ Pro $k_{max}=1$ se použije pouze $b <^1_{\text{lex}} a$, což z definice dává jedinou podmínku $x_2<x_1$. Pro $k_{max}=3$ už používáme nerovnosti $b <^1_{\text{lex}} a$, $b <^2_{\text{lex}} a$, $b <^3_{\text{lex}} a$. Ty nám z definice dávají podmínky $x_2<x_1$ pro první pozici, $x_2 = x_1, x_3 < x_2$ pro druhou pozici a $x_2 = x_1, x_3 = x_2, x_1<x_3$ pro třetí pozici. Z podmínek pro třetí pozici dostáváme spor, jelikož by muselo platit $x_1<x_3=x_2=x_1$. Pro $k_{max}=2$ a $k_{max}=3$ by tedy byly výsledky totožné, protože se $b <^3_{\text{lex}} a$ kvůli nalezenému sporu přeskočí. Případy $k_{max}=4$ a $k_{max}=5$ již nové podmínky také nepřinesou, protože nerovnost $b <^4_{\text{lex}} a$ by zahrnovala podmínku $x_4<x_4$ a podobně nerovnost $b <^5_{\text{lex}} a$ by zahrnovala podmínku $x_5<x_5$. Opět tedy v obou případech dostáváme spor. Jelikož jsme již prošli celý vektor, tak uvažovat vyšší $k_{max}$ nedává smysl. Zadat výšší hodnoty $k_{max}$ však možné je a funkce v tomto případě jednoduše použije nejvyšší možnou hodnotu $k_{max}$, která pro zadání dává smysl, což v tomto příkladu odpovídá $k_{max}=5$. To je zajištěno podmínkou $i = 1,\ldots,\min(k_{\max},n)$.
+\end{prikl}
+
+Regulace hloubky generování klauzulí je velmi důležitá. Zpravidla jsou totiž podmínky získané z $b <^i_{\text{lex}} a$ efektivnější pro menší $i$. Je to dáno především tím, že proměnné vyskytující se později ve vektoru proměnných mají nižší váhu a také část získaných podmínek může být už pokryta dříve vygenerovanými omezeními. Samotné generování klauzulí pro vyšší $k_{\max}$ také vede k delšímu času generování. Proto bychom mohli hledat „optimální“ $k_{\max}$, pro které rozbijeme dostatek symetrií, aby běh SAT řešiče byl dostatečně rychlý, ale pro které zároveň generování klauzulí netrvá příliš dlouho. Důležité je také poznamenat, že množina řešení je monotónně nerostoucí s rostoucím $k_{\max}$. To popíšeme následujícím lemmatem.
+
+\begin{lemma}[Monotónnost množiny řešení podle $k_{\max}$]
+Nechť $P$ je množina permutací, které odpovídají symetriím formule $F$. Označme $F_{P,k}$ formuli vzniklou z formule $F$ přidáním klauzulí generovaných z permutací $P$ do hloubky $k$, neboli přidáním podmínek získaných negací podmínek $\pi(x) <^i_{\text{lex}} x$ pro všechna $\pi \in P$ a všechna $i=1,...,k$. Pokud $k_1\leq k_2$, pak množina řešení formule $F_{P,k_2}$ musí být obsažena v množině řešení formule $F_{P,k_1}$.
+\end{lemma}
+
+\begin{proof}
+Pokud máme $k_1\leq k_2$, pak se v obou případech přidají podmínky získané negací podmínek $\bigvee_{\pi \in P} \bigvee_{i=1}^{k_1} \pi(x) <_{\text{lex}}^{i} x$. Pro $k_2$ pak navíc přibydou další podmínky pro $i=k_1+1,...,k_2$. Jelikož je tedy množina podmínek pro $k_1$ podmnožinou množiny podmínek pro $k_2$, musí každé řešení formule $F_{P,k_2}$ být zároveň řešením formule $F_{P,k_1}$. Žádná řešení tedy nemohou přibýt, mohou být pouze dalšími podmínkami odstraněna.
+\end{proof}
+
+V každém kroku se uvažuje vzor odpovídající situaci, kdy jsou vektory $a$ a $b$ na všech předchozích pozicích stejné a na pozici $i$ platí $b_i < a_i$. Jelikož pracujeme s binárními proměnnými, znamená tato ostrá nerovnost podmínky $b_i = 0$ a $a_i = 1$. Pokud je proměnná $a_i$ rovna proměnné $b_i$, daná pozice nemůže být první pozicí, na které je $b$ ostře menší než $a$, a proto se přeskočí.
+
+Při konstrukci vzoru se dále udržuje množina aktivních proměnných. Aktivní proměnné jsou právě ty proměnné, které se v daném kroku skutečně podílejí na podmínkách určujících vzor. Jedná se tedy o proměnné vystupující v $a$ a $b$ na pozicích před $i$, kde požadujeme rovnost odpovídajících složek vektorů, a o proměnné $a_i$ a $b_i$, které určují první ostrou nerovnost.
+
+Rovnosti mezi proměnnými, které vznikají z podmínek $a_j = b_j$ pro $j < i$, a dále vztahy $a_i = 1, b_i = 0$, jsou ukládány pomocí datové struktury \texttt{Disjoint-Set}, známé také jako \texttt{Union-Find}. V implementaci je k tomu využita externí knihovna \texttt{DisjointSet}. Tato struktura umožňuje efektivně reprezentovat třídy ekvivalencí mezi proměnnými a speciálními reprezentanty hodnot $0$ a $1$. Díky tomu lze snadno zjistit, které proměnné musí mít v daném vzoru stejnou hodnotu, případně zda některá proměnná musí být rovna konstantě.
+
+Po vytvoření všech rovností pro daný vzor se ověří, zda nevznikl spor mezi hodnotami $0$ a $1$. Pokud by se v jedné třídě ekvivalence ocitly současně reprezentanty obou těchto hodnot, znamenalo by to, že daný vzor není splnitelný. V takovém případě není potřeba pro tento vzor generovat žádnou klauzuli a algoritmus pokračuje dalším krokem.
+
+Pro všechny aktivní proměnné se následně určí kanonický reprezentant jejich třídy ekvivalence. Tyto reprezentanty jsou v implementaci uloženy v množině $canon$ a jsou určeny pomocí funkce z knihovny \texttt{DisjointSet}. Kanonické prvky slouží k tomu, aby bylo možné efektivně rozlišit, zda je daná proměnná ekvivalentní hodnotě $0$, hodnotě $1$, nebo jiné proměnné.
+
+Pokud je proměnná v daném vzoru ekvivalentní hodnotě $0$, přidá se do výsledné klauzule její kladný literál. Analogicky, pokud je proměnná ekvivalentní hodnotě $1$, přidá se do klauzule její záporný literál. Výsledná klauzule tedy představuje negaci celého vzoru.
+
+\begin{prikl}
+Pro ujasnění si práci s výše popsanými prvky předvedeme na konkrétním příkladu. Uvažujme vektory proměnných $$a=(x_1, x_2, x_3, x_4, x_5, x_6, x_7, x_8), b=(x_2, x_1, x_3, x_5, x_6, x_4, x_7, x_8).$$
+Nechť jsme u pátého kroku, tedy $b <^5_{\text{lex}} a$. Aktivní proměnné jsou zde ty proměnné, které se alespoň v jednom z vektorů vyskytují na pozicích $1,...,5$. Jsou to tedy $x_1, x_2, x_3, x_4, x_5, x_6$. Z definice $b <^5_{\text{lex}} a$ máme podmínky $x_6<x_5, x_2=x_1,x_1=x_2,x_3=x_3,x_5=x_4$. Z rovností struktura \texttt{DisjointSet} vytvoří třídy $$(x_1, x_2), (x_3), (x_4, x_5), (x_6).$$ Z ostré nerovnosti se určí $x_6=0$ a $x_5=1$, což se ve struktuře projeví jako $$(x_1, x_2), (x_3), (x_4, x_5, \mathbf{1}), (x_6, \mathbf{0}).$$ Vidíme, že $0$ a $1$ nejsou ve stejné třídě, takže spor nedostáváme. Pro ostatní proměnné se vytvoří množina $canon$, kam se pro každou proměnnou uloží reprezentant z její třídy, který musí být pro danou třídu vždy stejný. Pro $0$ a $1$ je také hledám reprezentant, kterým se ověřuje, jestli náleží do stejné třídy. Označme si tyto reprezentanty $c0$ a $c1$. V našem případě by toto mohlo vypadat například takto: $$active = (x_1, x_2, x_3, x_4, x_5, x_6)$$ $$canon=(x_1, x_1, x_3, x_4, x_4, x_6), c0=x_6, c1=x_4$$ Následně už jen procházíme množinu $canon$ a pro každou pozici nejdříve porovnáváme, jestli je shodná s $c0$ nebo $c1$. Pokud není, tak danou pozici v $canon$ srovnáme se stejnou pozicí v $active$. Podle toho určíme, jaké klauzule pro každou podmínku přidat. V našem případě to bude vypadat následovně.
+\begin{enumerate}
+        \item Pro $x_1$ nepřidáváme žádné klauzule, protože odpovídající reprezentant v $canon$ není roven $c0$ ani $c1$ a je to samotné $x_1$ (to se zjistí porovnáním s množinou $active$).
+        \item Pro $x_2$ opět není roven $c0$ ani $c1$, ale je to $x_1$. Musíme tedy přidat klauzule pro $x_2=x_1$ (reálně tedy $x_2\neq x_1$, protože vše musíme negovat).
+        \item Případ $x_3$ je stejný jako případ $x_1$, takže nepřidáme žádné klauzule.
+	\item Pro $x_4$ i $x_5$ zjistíme, že jejich reprezentanty se rovnají $c1$, a tedy přidáváme klauzule pro $x_4=1$ a $x_5=1$.
+	\item Nakonec pro $x_6$ zjistíme, že reprezentant se rovná $c0$, takže $x_6=0$.
+    \end{enumerate} 
+\end{prikl}
+
+Zbývajícím případem je situace, kdy je proměnná ekvivalentní jiné proměnné, ale nikoliv přímo konstantě. V takovém případě je potřeba v negaci vzoru vyjádřit podmínku, že tyto dvě proměnné nemají stejnou hodnotu. Pro tuto nerovnost se zavádí pomocná proměnná reprezentující vztah $x \neq y$ pro proměnné $x$ a $y$. Aby nebylo nutné pro stejnou dvojici proměnných vytvářet pomocnou proměnnou opakovaně, uchovává se jejich reprezentace ve struktuře $aux$.
+
+Převod těchto pomocných podmínek do CNF tvaru je proveden pomocí Tseitinovy transformace \cite{tseitin68}. Pro novou pomocnou proměnnou $t$, která reprezentuje vztah $x \neq y$, jsou přidány klauzule zajišťující ekvivalenci
+$t \leftrightarrow (x \neq y)$.
+Díky tomu lze v klauzuli použít pouze literál $t$, zatímco definice vztahu $t$ a $x \neq y$ je zachycena samostatnými klauzulemi \cite{tseitin68}.
+
+Po zpracování všech aktivních proměnných se výsledná klauzule přidá do množiny všech vygenerovaných klauzulí pro tuto dvojici vektorů proměnných. Tato klauzule zakazuje $b <^i_{\mathrm{lex}} a$. Opakováním tohoto postupu pro všechny uvažované pozice $i$ získáme klauzule, které zakazují, aby zpermutovaná varianta byla lexikograficky menší než původní řešení. Tím je dosaženo požadované podmínky $a \leq_{\text{lex}} b$, případně její omezené varianty určené parametrem $k_{\max}$.
+
+
+\begin{algorithm}[H]
+\caption{Generování klauzulí z porovnání dvou vektorů proměnných}
+\begin{algorithmic}[1]
+\Function{GetClauses}{$a,b,k_{\max},aux$}
+\State $C\gets\emptyset$
+\For{$i=0,\ldots,\min(k_{\max}-1,n-1)$}
+\If{$a_i=b_i$}
+\State \textbf{continue}
+\EndIf
+
+    	\State $c\gets \{(\neg a_i\vee b_i)\}$
+
+    	\State Zkonstruujeme všechny rovnosti a nerovnosti odpovídající vzoru $pat_i$
+    	\State Přidáme podmínky $a_i=1$ a $b_i=0$
+
+    	\State Určíme třídy ekvivalencí proměnných
+
+    	\If{$0$ náleží do stejné třídy ekvivalencí jako $1$}
+        	\State \textbf{continue}
+    	\EndIf
+
+    	\ForAll{aktivní proměnné $x$}
+        	\If{$x\equiv 0$}
+            		\State $c \gets c \cup \{x\}$
+        	\ElsIf{$x\equiv 1$}
+            		\State  $c \gets c \cup  \{\neg x\}$
+	        \ElsIf{$x\equiv y$ pro $x\neq y$}
+		    	\If{$\exists t \in aux$ takové, že t reprezentuje $x\neq y$}	
+		 		\State $c \gets c \cup \{t\}$
+	    		\Else
+		 		\State $t :=$ pomocná proměnná reprezentující $x\neq y$
+		 		\State $C \gets C \cup$ \{klauzule definující reprezentaci pro $t$\}
+		 		\State $c \gets c \cup \{t\}$
+	    		\EndIf
+        	\EndIf
+   	\EndFor
+
+    	\State $C\gets C\cup\{c\}$
+\EndFor
+\State \Return $(C,aux)$
+
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\section{Generování klauzulí pro rozbíjení symetrií}
+Tato funkce na vstupu dostává matici proměnných, typ symetrie, množinu permutací $perms$ a parametr $k_{\max}$. Množina $perms$ je vytvořena vybranou funkcí z funkcí popsaných v sekci 2.3. Podle typu symetrie funkce rozhodne, jakým způsobem budou tyto permutace aplikovány na binární matici reprezentující zadaný problém. Dále je v této funkci definována a udržována struktura pomocných proměnných $aux$.
+
+Pro každou uvažovanou permutaci je pomocí funkce $\texttt{GetPerm}$ vytvořena zpermutovaná varianta matice. Původní i zpermutovaná matice jsou následně převedeny na vektory a předány funkci $\texttt{GetClauses}$, která vygeneruje odpovídající klauzule. Ty jsou průběžně ukládány do výsledné množiny klauzulí.
+
+Funkce $\texttt{SymmetryClauses}$ tak tvoří zastřešující vrstvu celé implementace. Zatímco samotná konstrukce klauzulí probíhá ve funkci $\texttt{GetClauses}$, úkolem Algoritmu 4 je zajistit správné generování a zpracování všech permutací odpovídajících zadané symetrii.
+
+\begin{algorithm}[H]
+\caption{Generování klauzulí pro rozbíjení symetrií}
+\begin{algorithmic}[1]
+\Function{SymmetryClauses}{$matrix, symtype, perms, k_{max}$}
+\If{$k_{\max}=0$}
+\State \Return $\emptyset$
+\EndIf
+
+\State $C\gets\emptyset$
+\State $aux\gets$ struktura pomocných proměnných
+
+\ForAll{$(\pi_r, \pi_c) \in perms$}
+    	\State $M' \gets $\Call{GetPerm}{$M, \pi_r, \pi_c$}
+    	\State $a\gets \text{vec}(M)$
+    	\State $b\gets \text{vec}(M')$
+    	\State $(C_\pi,aux)\gets$\Call{GetClauses}{$a,b,k_{\max},aux$}
+    	\State $C\gets C\cup C_\pi$
+\EndFor
+
+\State \Return $C$
+
+\EndFunction
+\end{algorithmic}
+\end{algorithm}

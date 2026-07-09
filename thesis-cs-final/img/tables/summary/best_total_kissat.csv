@@ -1,0 +1,27 @@
+problém,solver,nejlepší množina permutací,nejlepší k,čas nástroje [s],čas kissat [s],celkový čas [s],čisté zrychlení vůči k=0,počet modelů,výsledek,timeout
+golf_g3_p3_w3,kissat,satsuma,16,0.0,0.004,0.004,1.5,652962.0,sat,False
+golf_g4_p4_w6,kissat,neighbors,76,0.518867015838623,4.333,4.851867015838623,7420.2775720095,0.0,unsat,False
+golf_g5_p3_w6,kissat,satsuma,90,0.019840717315673828,1.239,1.258840717315674,3.2100963564452742,,sat,False
+golf_g5_p4_w4,kissat,satsuma,0,0.0,1.868,1.868,1.0,,sat,False
+golf_g6_p2_w3,kissat,neighbors,0,0.0,0.005,0.005,1.0,,sat,False
+latinsq_lsq5,kissat,neighbors,0,0.0,0.003,0.003,1.0,161280.0,sat,False
+latinsq_lsq6,kissat,nongen,0,0.0,0.003,0.003,1.0,,sat,False
+latinsq_lsq7,kissat,satsuma,68,0.016083240509033203,0.006,0.0220832405090332,2.1283108328587255,,sat,False
+latinsq_lsq8,kissat,neighbors,0,0.0,0.003,0.003,1.0,,sat,False
+latinsq_lsq9,kissat,neighbors,0,0.0,0.008,0.008,1.0,,sat,False
+php_pig21_hol20,kissat,satsuma,420,0.009088277816772461,0.026,0.035088277816772456,1026086.2669865778,0.0,unsat,False
+php_pig25_hol20,kissat,satsuma,500,0.023466825485229492,0.032,0.05546682548522949,649036.6031419375,0.0,unsat,False
+php_pig31_hol30,kissat,satsuma,930,0.06365013122558594,0.057,0.12065013122558593,298400.0069812204,0.0,unsat,False
+php_pig35_hol15,kissat,satsuma,210,0.015911340713500977,0.017,0.03291134071350098,8806.022292525751,0.0,unsat,False
+php_pig40_hol10,kissat,satsuma,160,0.01616668701171875,0.014,0.03016668701171875,6.464084038272053,0.0,unsat,False
+queens_n10,kissat,satsuma,0,0.0,0.026,0.026,1.0,724.0,sat,False
+queens_n11,kissat,satsuma,0,0.0,0.024,0.024,1.0,2680.0,sat,False
+queens_n12,kissat,dihedral_gen,28,0.0,0.006,0.006,7.5,5193.0,sat,False
+queens_n13,kissat,satsuma,0,0.0,0.028,0.028,1.0,73712.0,sat,False
+queens_n14,kissat,satsuma,78,0.0,0.029,0.029,1.6206896551724137,272914.0,sat,False
+rcsums_rc10_rcrand2,kissat,satsuma,44,0.0,0.003,0.003,1.6666666666666667,345937.0,sat,False
+rcsums_rc10_rcrand5,kissat,satsuma,110,0.0,0.004,0.004,2.0,,sat,False
+rcsums_rc12_rcrand2,kissat,satsuma,124,0.0,0.005,0.005,1.2,4725433.0,sat,False
+rcsums_rc13_rcrand10,kissat,satsuma,72,0.0,0.017,0.017,1.764705882352941,,sat,False
+rcsums_rc14_rcrand13,kissat,satsuma,84,0.0,0.038,0.038,7.210526315789474,0.0,unsat,False
+rcsums_rc15_rcrand3,kissat,satsuma,144,0.0,0.008,0.008,3.625,,sat,False
