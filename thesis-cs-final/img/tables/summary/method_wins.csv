@@ -1,0 +1,57 @@
+metrika,množina permutací,počet vítězství,podíl vítězství,počet hodnocených problémů
+čas d4,dihedral_gen,2,0.07692307692307693,26
+čas d4,gen2,2,0.07692307692307693,26
+čas d4,neighbors,6,0.23076923076923078,26
+čas d4,nongen,0,0.0,26
+čas d4,randtrans,0,0.0,26
+čas d4,satsuma,13,0.5,26
+čas d4,sums_neighbors,3,0.11538461538461539,26
+čas d4,transpositions,0,0.0,26
+čas kissat,dihedral_gen,1,0.038461538461538464,26
+čas kissat,gen2,2,0.07692307692307693,26
+čas kissat,neighbors,4,0.15384615384615385,26
+čas kissat,nongen,1,0.038461538461538464,26
+čas kissat,randtrans,0,0.0,26
+čas kissat,satsuma,17,0.6538461538461539,26
+čas kissat,sums_neighbors,1,0.038461538461538464,26
+čas kissat,transpositions,0,0.0,26
+celkový čas nástroj + d4,dihedral_gen,2,0.07692307692307693,26
+celkový čas nástroj + d4,gen2,2,0.07692307692307693,26
+celkový čas nástroj + d4,neighbors,6,0.23076923076923078,26
+celkový čas nástroj + d4,nongen,0,0.0,26
+celkový čas nástroj + d4,randtrans,0,0.0,26
+celkový čas nástroj + d4,satsuma,13,0.5,26
+celkový čas nástroj + d4,sums_neighbors,3,0.11538461538461539,26
+celkový čas nástroj + d4,transpositions,0,0.0,26
+celkový čas nástroj + kissat,dihedral_gen,1,0.038461538461538464,26
+celkový čas nástroj + kissat,gen2,0,0.0,26
+celkový čas nástroj + kissat,neighbors,5,0.19230769230769232,26
+celkový čas nástroj + kissat,nongen,1,0.038461538461538464,26
+celkový čas nástroj + kissat,randtrans,0,0.0,26
+celkový čas nástroj + kissat,satsuma,19,0.7307692307692307,26
+celkový čas nástroj + kissat,sums_neighbors,0,0.0,26
+celkový čas nástroj + kissat,transpositions,0,0.0,26
+počet modelů,dihedral_gen,2,0.1111111111111111,18
+počet modelů,gen2,1,0.05555555555555555,18
+počet modelů,neighbors,7,0.3888888888888889,18
+počet modelů,nongen,0,0.0,18
+počet modelů,randtrans,0,0.0,18
+počet modelů,satsuma,4,0.2222222222222222,18
+počet modelů,sums_neighbors,2,0.1111111111111111,18
+počet modelů,transpositions,2,0.1111111111111111,18
+čisté zrychlení d4,dihedral_gen,2,0.07692307692307693,26
+čisté zrychlení d4,gen2,3,0.11538461538461539,26
+čisté zrychlení d4,neighbors,6,0.23076923076923078,26
+čisté zrychlení d4,nongen,0,0.0,26
+čisté zrychlení d4,randtrans,0,0.0,26
+čisté zrychlení d4,satsuma,12,0.46153846153846156,26
+čisté zrychlení d4,sums_neighbors,3,0.11538461538461539,26
+čisté zrychlení d4,transpositions,0,0.0,26
+čisté zrychlení kissat,dihedral_gen,4,0.15384615384615385,26
+čisté zrychlení kissat,gen2,6,0.23076923076923078,26
+čisté zrychlení kissat,neighbors,1,0.038461538461538464,26
+čisté zrychlení kissat,nongen,0,0.0,26
+čisté zrychlení kissat,randtrans,0,0.0,26
+čisté zrychlení kissat,satsuma,15,0.5769230769230769,26
+čisté zrychlení kissat,sums_neighbors,0,0.0,26
+čisté zrychlení kissat,transpositions,0,0.0,26
